@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-type-test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: imresamu/postgis:16-3.4
+        env:
+          POSTGRES_USER: fudz
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: fudz_v2
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fudz"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: fudz
+      DB_PASSWORD: password
+      DB_NAME: fudz_v2
+      DB_SSLMODE: disable
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        run: pipx install uv
+
+      - name: Install deps
+        run: uv sync
+
+      - name: Apply migrations
+        run: uv run alembic upgrade head
+
+      - name: Ruff check
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: Mypy
+        run: uv run mypy app
+
+      - name: Pytest
+        run: uv run pytest -v --cov=app --cov-report=term-missing

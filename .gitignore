@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+*.json          # ← THIS prevents another Firebase-key leak
+!package.json
+!tsconfig.json
+!apps/api/pyproject.toml
+!apps/api/uv.lock
+# ... rest of standard ignores

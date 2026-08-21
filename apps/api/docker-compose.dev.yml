@@ -1,0 +1,38 @@
+services:
+  db:
+    image: imresamu/postgis:16-3.4
+    environment:
+      POSTGRES_USER: fudz
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: fudz_v2
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    networks: [internal]
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env.example
+    ports:
+      - "8002:8002"
+    volumes:
+      - .:/app
+      - /app/.venv
+    depends_on:
+      - db
+      - redis
+    networks: [internal]
+
+volumes:
+  postgres_data:
+
+networks:
+  internal:
