@@ -54,7 +54,7 @@ jobs:
         run: uv run alembic upgrade head
 
       - name: Ruff check
-        run: uv run ruff check --fix .
+        run: uv run ruff check --fix --unsafe-fixes .
 
       - name: Ruff format check
         run: uv run ruff format --check .
