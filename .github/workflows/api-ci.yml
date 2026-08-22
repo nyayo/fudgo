@@ -8,6 +8,9 @@ on:
 jobs:
   lint-type-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
     services:
       db:
         image: imresamu/postgis:16-3.4
