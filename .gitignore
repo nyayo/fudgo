@@ -6,4 +6,6 @@
 !tsconfig.json
 !apps/api/pyproject.toml
 !apps/api/uv.lock
+!packages/api-contracts/openapi.json
 # ... rest of standard ignores
+packages/api-contracts/typescript/

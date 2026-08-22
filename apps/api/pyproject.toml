@@ -1,5 +1,5 @@
 [project]
-name = "fudz-api-v2"
+name = "fudgo-api"
 version = "0.1.0"
 description = "Fudz food-delivery backend v2: FastAPI + SQLModel + PostGIS rewrite of the Django/DRF v1."
 readme = "README.md"
@@ -15,6 +15,7 @@ dependencies = [
     "pydantic-settings>=2.4",
     "python-jose[cryptography]>=3.3",
     "passlib[bcrypt]>=1.7",
+    "bcrypt>=4.0,<5.0",
     "python-multipart>=0.0.9",
     "geoalchemy2>=0.15",
     "shapely>=2.0",

@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: fudz
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: fudz_v2
+      POSTGRES_DB: fudgo
     ports:
       - "5432:5432"
     volumes:

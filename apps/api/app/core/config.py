@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     )
 
     # Project metadata
-    PROJECT_NAME: str = "Fudz API v2"
+    PROJECT_NAME: str = "Fudgo API"
     VERSION: str = "0.1.0"
     API_V2_PREFIX: str = "/api/v2"
     DEBUG: bool = False
@@ -43,9 +43,9 @@ class Settings(BaseSettings):
     # Database (PostGIS)
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
-    DB_USER: str = "fudz"
+    DB_USER: str = "fudgo"
     DB_PASSWORD: str = "password"
-    DB_NAME: str = "fudz_v2"
+    DB_NAME: str = "fudgo"
     DB_SSLMODE: str = "prefer"  # prefer | require | verify-full | disable
     DB_POOL_MIN_SIZE: int = 1
     DB_POOL_MAX_SIZE: int = 20
@@ -87,8 +87,8 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TTL_MINUTES: int = 15
     JWT_REFRESH_TTL_DAYS: int = 7
-    JWT_ISSUER: str = "fudz-api-v2"
-    JWT_AUDIENCE: str = "fudz-clients"
+    JWT_ISSUER: str = "fudgo-api"
+    JWT_AUDIENCE: str = "fudgo-clients"
 
     # Google OAuth (placeholders; Phase 1)
     GOOGLE_CLIENT_ID: str = ""

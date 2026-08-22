@@ -1,4 +1,4 @@
-# Fudz API v2
+# Fudgo API
 
 Ground-up rewrite of the Fudz food-delivery backend from Django/DRF to
 FastAPI + SQLModel + PostGIS. The Django original lives at

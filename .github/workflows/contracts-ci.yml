@@ -1,0 +1,59 @@
+name: contracts
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/'
+      - 'tools/scripts/'
+      - 'packages/api-contracts/**'
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: imresamu/postgis:16-3.4
+        env:
+          POSTGRES_USER: fudgo
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: fudgo_contracts
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 3s --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install uv
+      - name: Install api deps
+        working-directory: apps/api
+        run: uv sync
+      - name: Run migrations
+        working-directory: apps/api
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: fudgo
+          DB_PASSWORD: password
+          DB_NAME: fudgo_contracts
+          JWT_SECRET: test-secret
+        run: uv run alembic upgrade head
+      - name: Generate OpenAPI
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: fudgo
+          DB_PASSWORD: password
+          DB_NAME: fudgo_contracts
+          JWT_SECRET: test-secret
+        run: python tools/scripts/generate_openapi.py
+      - name: Check for drift
+        run: |
+          if ! git diff --exit-code packages/api-contracts/openapi.json; then
+            echo "::error::OpenAPI spec changed but packages/api-contracts/openapi.json was not updated."
+            echo "::error::Run 'python tools/scripts/generate_openapi.py' locally and commit the result."
+            exit 1
+          fi

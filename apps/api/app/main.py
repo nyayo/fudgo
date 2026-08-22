@@ -18,6 +18,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.v2.router import router as api_v2_router
+from app.auth.deps import limiter
 from app.core.config import get_settings
 from app.core.envelope import error_envelope
 from app.core.exceptions import AppError
@@ -26,8 +27,9 @@ from app.core.middleware import RequestContextMiddleware, TimingMiddleware
 from app.db.session import engine
 from app.health.router import router as health_router
 from app.observability.metrics import setup_metrics
+from slowapi.errors import RateLimitExceeded
 
-logger = structlog.get_logger("fudz.api")
+logger = structlog.get_logger("fudgo.api")
 
 
 @asynccontextmanager
@@ -36,7 +38,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
     settings = get_settings()
     configure_logging()
     logger.info(
-        "fudz-api-v2 starting",
+        "fudgo-api starting",
         environment=settings.ENVIRONMENT,
         host=settings.HOST,
         port=settings.PORT,
@@ -45,7 +47,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
     )
     yield
     await engine.dispose()
-    logger.info("fudz-api-v2 shutdown complete")
+    logger.info("fudgo-api shutdown complete")
 
 
 def _register_exception_handlers(app: FastAPI) -> None:
@@ -81,7 +83,7 @@ def _register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(SQLAlchemyError)
     async def sqlalchemy_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:  # noqa: ARG001
-        logger.error("database error", error=str(exc))
+        logger.exception("database error", exc_info=exc)
         return JSONResponse(
             status_code=500,
             content=error_envelope(500, "Internal server error"),
@@ -129,7 +131,21 @@ def create_app() -> FastAPI:
     app.include_router(health_router, prefix="/health")
     app.include_router(api_v2_router, prefix=settings.API_V2_PREFIX)
 
+    configure_logging()
     setup_metrics(app)
+
+    # slowapi integration
+    app.state.limiter = limiter
+
+    @app.exception_handler(RateLimitExceeded)
+    async def rate_limit_handler(  # type: ignore[no-untyped-def]
+        request: Request, exc: RateLimitExceeded
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=429,
+            content=error_envelope(429, "Too many requests", {"limit": str(exc.detail)}),
+        )
+
     return app
 
 
