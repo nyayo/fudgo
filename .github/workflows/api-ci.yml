@@ -40,6 +40,11 @@ jobs:
       REDIS_HOST: localhost
       REDIS_PORT: 6379
       REDIS_DB: 0
+      # Required for tests: forces NullPool so each connection binds to the
+      # current test's event loop, preventing asyncpg's "different loop"
+      # RuntimeError. Production code is unaffected (the env var is only
+      # checked in app/db/session.py).
+      FUDGO_NULLPOOL: "1"
 
     steps:
       - uses: actions/checkout@v4
