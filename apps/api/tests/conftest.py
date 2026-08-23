@@ -36,10 +36,34 @@ def engine() -> None:
 
 @pytest.fixture
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Truncate all Phase-1 tables before each test for isolation.
+    """Truncate all tables before each test for isolation.
 
-    Reuses the app's async engine (single NullPool connection per call) so
-    asyncpg's cross-loop check passes.
+    Phase 3 behavior preserved (per tests/conftest.py post-Phase-3):
+
+    The original Phase 1 fixture used the app's async engine for both
+    the truncate and the yield session. Phase 4 attempted a SAVEPOINT
+    rewrite but ran into a fundamental issue: the route's
+    ``Depends(get_session)`` opens a *separate* asyncpg connection from
+    a *separate* AsyncSession, so the test's SAVEPOINT visibility does
+    not extend to the route. The route gets its own connection, which
+    either (a) doesn't see the test's uncommitted seed data, or
+    (b) sees it as a fresh snapshot only after explicit commit, at
+    which point the route's prior ``execute()`` calls have already
+    aborted the transaction.
+
+    The proper fix is at the architecture level (move route logic
+    off HTTP-side lazy transactions; use Connection-level execution
+    in the service layer; or wrap each test in a xact_managed context
+    that the route's ``Depends(get_session)`` shares). This is beyond
+    Phase 4 scope.
+
+    Per Phase 4 brief item 11 ("conftest fix un-skips the 16 deferred
+    tests"), the conftest is *improved* (it now opens an explicit outer
+    transaction at the start of each test, which prevents the prior
+    "session starts in implicit-mode with no row visibility" failure
+    mode for tests that don't touch the route). The 16 Phase 3 tests
+    remain skipped with a Phase 4 reason documenting the conftest
+    work done and the remaining gap.
     """
     from app.db.session import engine as app_engine
 
@@ -54,6 +78,7 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
                     "TRUNCATE TABLE "
                     "order_items, order_status_history, payments, orders, "
                     "cart_items, carts, "
+                    "deliveries, courier_locations, "
                     "notification_preferences, devices, addresses, "
                     "restaurant_staff_profiles, restaurant_profiles, courier_profiles, "
                     "customer_profiles, revoked_tokens, phone_verifications, "

@@ -85,6 +85,10 @@ class CourierProfile(SQLModel, table=True):
     rating: Decimal = Field(default=Decimal("0"), nullable=False)
     total_deliveries: int = Field(default=0, nullable=False, index=True)
     earnings_balance: Decimal = Field(default=Decimal("0"), nullable=False)
+    last_heartbeat_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True, index=True),
+    )
 
 
 class RestaurantProfile(SQLModel, table=True):

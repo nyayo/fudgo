@@ -34,7 +34,7 @@ logger = structlog.get_logger("fudgo.api")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
-    """Startup: configure logging + metrics. Shutdown: dispose engine."""
+    """Startup: configure logging + metrics + ConnectionManager. Shutdown: dispose engine."""
     settings = get_settings()
     configure_logging()
     logger.info(
@@ -45,6 +45,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
         db_host=settings.DB_HOST,
         version=settings.VERSION,
     )
+    # Phase 4: in-process WebSocket pub/sub
+    from app.deliveries.runtime import set_connection_manager
+    from app.realtime.connection_manager import ConnectionManager
+
+    manager = ConnectionManager(
+        max_per_user=settings.WS_MAX_CONNECTIONS_PER_USER,
+        ping_interval_s=settings.WS_PING_INTERVAL_S,
+        pong_timeout_s=settings.WS_PONG_TIMEOUT_S,
+    )
+    app.state.connection_manager = manager
+    set_connection_manager(manager)
     yield
     await engine.dispose()
     logger.info("fudgo-api shutdown complete")

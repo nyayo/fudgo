@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     CORS_ALLOW_ALL_ORIGINS: bool = True  # tighten in later phases
     CORS_ALLOWED_ORIGINS: list[str] = []
 
+    # WebSocket (Phase 4)
+    WS_MAX_CONNECTIONS_PER_USER: int = 5
+    WS_PING_INTERVAL_S: int = 30
+    WS_PONG_TIMEOUT_S: int = 10
+
     # Database (PostGIS)
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432

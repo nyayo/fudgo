@@ -121,6 +121,19 @@
         "title": "AddressUpdate",
         "type": "object"
       },
+      "AvailabilityRequest": {
+        "properties": {
+          "is_available": {
+            "title": "Is Available",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "is_available"
+        ],
+        "title": "AvailabilityRequest",
+        "type": "object"
+      },
       "Body_attach_category_image_api_v2_restaurants__restaurant_id__categories__category_id__image_post": {
         "properties": {
           "file": {
@@ -256,6 +269,380 @@
         "title": "CheckoutRequest",
         "type": "object"
       },
+      "CourierLocationResponse": {
+        "properties": {
+          "accuracy_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accuracy M"
+          },
+          "battery_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Battery Level"
+          },
+          "courier_id": {
+            "format": "uuid",
+            "title": "Courier Id",
+            "type": "string"
+          },
+          "heading_degrees": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heading Degrees"
+          },
+          "lat": {
+            "title": "Lat",
+            "type": "number"
+          },
+          "lng": {
+            "title": "Lng",
+            "type": "number"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "speed_kmh": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speed Kmh"
+          }
+        },
+        "required": [
+          "courier_id",
+          "lat",
+          "lng",
+          "recorded_at"
+        ],
+        "title": "CourierLocationResponse",
+        "type": "object"
+      },
+      "DeliveryCancelRequest": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "DeliveryCancelRequest",
+        "type": "object"
+      },
+      "DeliveryFailRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "DeliveryFailRequest",
+        "type": "object"
+      },
+      "DeliveryProofRequest": {
+        "properties": {
+          "image_url": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "title": "DeliveryProofRequest",
+        "type": "object"
+      },
+      "DeliveryResponse": {
+        "properties": {
+          "arrived_at_pickup_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Arrived At Pickup At"
+          },
+          "assigned_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned At"
+          },
+          "cancelled_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancelled Reason"
+          },
+          "courier_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Courier Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "delivered_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivered At"
+          },
+          "dropoff_address": {
+            "title": "Dropoff Address",
+            "type": "string"
+          },
+          "dropoff_lat": {
+            "title": "Dropoff Lat",
+            "type": "number"
+          },
+          "dropoff_lng": {
+            "title": "Dropoff Lng",
+            "type": "number"
+          },
+          "en_route_delivery_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "En Route Delivery At"
+          },
+          "en_route_pickup_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "En Route Pickup At"
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Reason"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "order_id": {
+            "format": "uuid",
+            "title": "Order Id",
+            "type": "string"
+          },
+          "picked_up_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Picked Up At"
+          },
+          "pickup_address": {
+            "title": "Pickup Address",
+            "type": "string"
+          },
+          "pickup_lat": {
+            "title": "Pickup Lat",
+            "type": "number"
+          },
+          "pickup_lng": {
+            "title": "Pickup Lng",
+            "type": "number"
+          },
+          "proof_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proof Image Url"
+          },
+          "proof_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proof Notes"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DeliveryStatus"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "order_id",
+          "courier_id",
+          "status",
+          "pickup_address",
+          "pickup_lat",
+          "pickup_lng",
+          "dropoff_address",
+          "dropoff_lat",
+          "dropoff_lng",
+          "assigned_at",
+          "en_route_pickup_at",
+          "arrived_at_pickup_at",
+          "picked_up_at",
+          "en_route_delivery_at",
+          "delivered_at",
+          "proof_image_url",
+          "proof_notes",
+          "failure_reason",
+          "cancelled_reason",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DeliveryResponse",
+        "type": "object"
+      },
+      "DeliveryStatus": {
+        "enum": [
+          "assigned",
+          "en_route_pickup",
+          "arrived_at_pickup",
+          "picked_up",
+          "en_route_delivery",
+          "delivered",
+          "failed",
+          "cancelled"
+        ],
+        "title": "DeliveryStatus",
+        "type": "string"
+      },
+      "DeliveryTransitionRequest": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "title": "DeliveryTransitionRequest",
+        "type": "object"
+      },
       "DeviceRegisterSchema": {
         "properties": {
           "platform": {
@@ -279,6 +666,46 @@
           "platform"
         ],
         "title": "DeviceRegisterSchema",
+        "type": "object"
+      },
+      "ETAResponse": {
+        "properties": {
+          "courier_last_seen_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Courier Last Seen At"
+          },
+          "delivery_eta_minutes": {
+            "title": "Delivery Eta Minutes",
+            "type": "integer"
+          },
+          "distance_to_delivery_km": {
+            "title": "Distance To Delivery Km",
+            "type": "number"
+          },
+          "distance_to_pickup_km": {
+            "title": "Distance To Pickup Km",
+            "type": "number"
+          },
+          "pickup_eta_minutes": {
+            "title": "Pickup Eta Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pickup_eta_minutes",
+          "delivery_eta_minutes",
+          "distance_to_pickup_km",
+          "distance_to_delivery_km"
+        ],
+        "title": "ETAResponse",
         "type": "object"
       },
       "GoogleSignInSchema": {
@@ -336,6 +763,87 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HeartbeatRequest": {
+        "properties": {
+          "accuracy_m": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accuracy M"
+          },
+          "battery_level": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Battery Level"
+          },
+          "heading_degrees": {
+            "anyOf": [
+              {
+                "exclusiveMaximum": 360.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heading Degrees"
+          },
+          "is_available": {
+            "default": true,
+            "title": "Is Available",
+            "type": "boolean"
+          },
+          "lat": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat",
+            "type": "number"
+          },
+          "lng": {
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lng",
+            "type": "number"
+          },
+          "source": {
+            "$ref": "#/components/schemas/LocationProvider",
+            "default": "gps"
+          },
+          "speed_kmh": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speed Kmh"
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "title": "HeartbeatRequest",
+        "type": "object"
+      },
       "LinkGoogleAccountSchema": {
         "properties": {
           "id_token": {
@@ -348,6 +856,15 @@
         ],
         "title": "LinkGoogleAccountSchema",
         "type": "object"
+      },
+      "LocationProvider": {
+        "enum": [
+          "gps",
+          "network",
+          "manual"
+        ],
+        "title": "LocationProvider",
+        "type": "string"
       },
       "LogoutSchema": {
         "properties": {
@@ -2407,6 +2924,166 @@
         ]
       }
     },
+    "/api/v2/courier/heartbeat": {
+      "post": {
+        "operationId": "courier_heartbeat_api_v2_courier_heartbeat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeartbeatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Courier Heartbeat Api V2 Courier Heartbeat Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier Heartbeat",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/courier/me/active-deliveries": {
+      "get": {
+        "operationId": "courier_active_deliveries_api_v2_courier_me_active_deliveries_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeliveryResponse"
+                  },
+                  "title": "Response Courier Active Deliveries Api V2 Courier Me Active Deliveries Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier Active Deliveries",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/courier/me/availability": {
+      "post": {
+        "operationId": "courier_availability_api_v2_courier_me_availability_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Courier Availability Api V2 Courier Me Availability Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier Availability",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/courier/me/location": {
+      "get": {
+        "operationId": "courier_me_location_api_v2_courier_me_location_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/CourierLocationResponse"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Courier Me Location Api V2 Courier Me Location Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier Me Location",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
     "/api/v2/courier/orders/available": {
       "get": {
         "operationId": "list_available_orders_api_v2_courier_orders_available_get",
@@ -2804,6 +3481,389 @@
         "summary": "On The Way",
         "tags": [
           "orders"
+        ]
+      }
+    },
+    "/api/v2/deliveries/{delivery_id}/arrived-at-pickup": {
+      "post": {
+        "operationId": "courier_arrived_at_pickup_api_v2_deliveries__delivery_id__arrived_at_pickup_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Courier Arrived At Pickup Api V2 Deliveries  Delivery Id  Arrived At Pickup Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier Arrived At Pickup",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/deliveries/{delivery_id}/cancel": {
+      "post": {
+        "operationId": "courier_cancel_api_v2_deliveries__delivery_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Courier Cancel Api V2 Deliveries  Delivery Id  Cancel Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier Cancel",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/deliveries/{delivery_id}/delivered": {
+      "post": {
+        "operationId": "courier_delivered_api_v2_deliveries__delivery_id__delivered_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryProofRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Courier Delivered Api V2 Deliveries  Delivery Id  Delivered Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier Delivered",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/deliveries/{delivery_id}/en-route-delivery": {
+      "post": {
+        "operationId": "courier_en_route_delivery_api_v2_deliveries__delivery_id__en_route_delivery_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Courier En Route Delivery Api V2 Deliveries  Delivery Id  En Route Delivery Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier En Route Delivery",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/deliveries/{delivery_id}/en-route-pickup": {
+      "post": {
+        "operationId": "courier_en_route_pickup_api_v2_deliveries__delivery_id__en_route_pickup_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DeliveryTransitionRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Courier En Route Pickup Api V2 Deliveries  Delivery Id  En Route Pickup Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier En Route Pickup",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/deliveries/{delivery_id}/fail": {
+      "post": {
+        "operationId": "courier_fail_api_v2_deliveries__delivery_id__fail_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryFailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Courier Fail Api V2 Deliveries  Delivery Id  Fail Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier Fail",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/deliveries/{delivery_id}/picked-up": {
+      "post": {
+        "operationId": "courier_picked_up_api_v2_deliveries__delivery_id__picked_up_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Courier Picked Up Api V2 Deliveries  Delivery Id  Picked Up Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Courier Picked Up",
+        "tags": [
+          "deliveries"
         ]
       }
     },
@@ -3250,6 +4310,158 @@
         "summary": "Confirm Order",
         "tags": [
           "orders"
+        ]
+      }
+    },
+    "/api/v2/orders/{order_id}/courier-location": {
+      "get": {
+        "operationId": "get_order_courier_location_api_v2_orders__order_id__courier_location_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/CourierLocationResponse"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Order Courier Location Api V2 Orders  Order Id  Courier Location Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Order Courier Location",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/orders/{order_id}/delivery": {
+      "get": {
+        "operationId": "get_delivery_by_order_api_v2_orders__order_id__delivery_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Delivery By Order",
+        "tags": [
+          "deliveries"
+        ]
+      }
+    },
+    "/api/v2/orders/{order_id}/eta": {
+      "get": {
+        "operationId": "get_order_eta_api_v2_orders__order_id__eta_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ETAResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Order Eta",
+        "tags": [
+          "deliveries"
         ]
       }
     },

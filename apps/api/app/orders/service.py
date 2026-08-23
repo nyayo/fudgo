@@ -514,16 +514,10 @@ async def checkout_cart(
     service_fee = compute_service_fee(subtotal)
     total = compute_cart_total(subtotal, delivery_fee, service_fee)
     today = datetime.now(UTC)
-    count = (
-        await session.execute(
-            text(
-                "SELECT COUNT(*) FROM orders "
-                "WHERE placed_at >= date_trunc('day', now() at time zone 'UTC') "
-                "AND placed_at < date_trunc('day', now() at time zone 'UTC') + interval '1 day'"
-            )
-        )
+    sequence = (
+        await session.execute(text("SELECT nextval('order_number_seq')"))
     ).scalar_one()
-    order_number = _build_order_number(today, int(count) + 1)
+    order_number = _build_order_number(today, int(sequence))
 
     order = Order(
         order_number=order_number,
