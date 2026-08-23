@@ -7,6 +7,7 @@ from fastapi import APIRouter
 
 from app.auth.router import router as auth_router
 from app.core.config import get_settings
+from app.orders.router import router as orders_router
 from app.restaurants.router import router as restaurants_router
 from app.restaurants.top_router import router as top_router
 from app.users.router import router as users_router
@@ -25,3 +26,4 @@ router.include_router(auth_router, tags=["auth"])
 router.include_router(users_router, tags=["users"])
 router.include_router(restaurants_router, tags=["restaurants"])
 router.include_router(top_router, tags=["catalog"])
+router.include_router(orders_router, tags=["orders"])

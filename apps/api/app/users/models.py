@@ -8,7 +8,7 @@ from typing import Any
 from geoalchemy2 import Geography
 from sqlalchemy import Column, DateTime, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 from app.users.enums import (
     AuthProvider,
@@ -102,6 +102,14 @@ class RestaurantProfile(SQLModel, table=True):
     rating: Decimal = Field(default=Decimal("0"), nullable=False, index=True)
     is_approved: bool = Field(default=False, nullable=False)
     is_active: bool = Field(default=True, nullable=False)
+    # Phase 3: delivery configuration
+    delivery_fee: Decimal = Field(
+        default=Decimal("0.00"), max_digits=10, decimal_places=2, nullable=False
+    )
+    delivery_radius_km: float = Field(default=5.0, nullable=False)
+    min_order_amount: Decimal = Field(
+        default=Decimal("0.00"), max_digits=10, decimal_places=2, nullable=False
+    )
 
 
 class RestaurantStaffProfile(SQLModel, table=True):

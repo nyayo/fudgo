@@ -85,7 +85,7 @@ exclude = ["migrations/", "tests/"]
 # but at runtime they are `ColumnElement[bool]`. This is the well-known
 # pattern recommended by both communities; do NOT silently remove it.
 [[tool.mypy.overrides]]
-module = ["app.auth.*", "app.users.*", "app.restaurants.*"]
+module = ["app.auth.*", "app.users.*", "app.restaurants.*", "app.orders.*"]
 disable_error_code = [
     "arg-type",       # .where(bool) / .order_by(datetime) — column expressions
     "call-overload",  # select(Model.id) — overload doesn't match UUID

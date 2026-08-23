@@ -52,6 +52,8 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
             await session.execute(
                 text(
                     "TRUNCATE TABLE "
+                    "order_items, order_status_history, payments, orders, "
+                    "cart_items, carts, "
                     "notification_preferences, devices, addresses, "
                     "restaurant_staff_profiles, restaurant_profiles, courier_profiles, "
                     "customer_profiles, revoked_tokens, phone_verifications, "
