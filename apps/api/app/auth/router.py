@@ -320,14 +320,15 @@ async def delete_device(
     current: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
+    from sqlalchemy import delete, select
+
     device = (
         await session.execute(
-            Device.__table__.select().where(Device.id == device_id, Device.user_id == current.id)
+            select(Device).where(Device.id == device_id, Device.user_id == current.id)
         )
-    ).first()
+    ).scalar_one_or_none()
     if device is None:
         return success_envelope({"message": "Device not found"})
-    from sqlalchemy import delete
 
     await session.execute(
         delete(Device).where(Device.id == device_id, Device.user_id == current.id)

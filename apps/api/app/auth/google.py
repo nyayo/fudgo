@@ -4,7 +4,7 @@ Phase 1 expects ``GOOGLE_CLIENT_ID`` to be set so audience is checked. Tests
 monkeypatch :func:`verify_google_id_token` to avoid hitting Google.
 """
 
-from typing import Any
+from typing import Any, cast
 
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
@@ -20,6 +20,9 @@ def verify_google_id_token(id_token_str: str) -> dict[str, Any]:
     """
     settings = get_settings()
     try:
+        # google.oauth2.id_token.verify_oauth2_token is loosely typed upstream
+        # (returns Any). We cast at the boundary to keep our function's return
+        # type honest.
         claims = id_token.verify_oauth2_token(
             id_token_str,
             google_requests.Request(),
@@ -29,4 +32,4 @@ def verify_google_id_token(id_token_str: str) -> dict[str, Any]:
         raise AuthenticationError("Invalid Google ID token") from exc
     if not claims.get("email"):
         raise AuthenticationError("Google account missing email")
-    return claims
+    return cast(dict[str, Any], claims)

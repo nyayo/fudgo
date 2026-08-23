@@ -75,6 +75,19 @@ ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
 exclude = ["migrations/", "tests/"]
 
+# SQLModel + SQLAlchemy + mypy false positives.
+# SQLModel's `Field()` does not generate `Mapped[X]` annotations, so column
+# comparisons like `Model.field == value` look like `bool == str` to mypy,
+# but at runtime they are `ColumnElement[bool]`. This is the well-known
+# pattern recommended by both communities; do NOT silently remove it.
+[[tool.mypy.overrides]]
+module = ["app.auth.*", "app.users.*"]
+disable_error_code = [
+    "arg-type",       # .where(bool) / .order_by(datetime) — column expressions
+    "call-overload",  # select(Model.id) — overload doesn't match UUID
+    "attr-defined",   # .is_(False), .desc() on column expressions
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"

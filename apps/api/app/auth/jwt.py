@@ -41,7 +41,8 @@ def _encode(user_id: uuid.UUID, token_type: TokenType, ttl: timedelta, jti: str)
         "iss": settings.JWT_ISSUER,
         "aud": settings.JWT_AUDIENCE,
     }
-    return jwt.encode(claims, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    token: str = jwt.encode(claims, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    return token
 
 
 def create_access_token(user_id: uuid.UUID, claims: dict[str, Any] | None = None) -> str:

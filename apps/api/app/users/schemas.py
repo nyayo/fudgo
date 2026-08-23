@@ -43,7 +43,7 @@ class AddressResponse(BaseModel):
 
 
 class RestaurantStaffCreate(BaseModel):
-    email: str = Field(min_length=3, max_length=200)  # type: ignore[assignment]
+    email: str = Field(min_length=3, max_length=200)
     first_name: str = Field(min_length=1, max_length=80)
     last_name: str = Field(min_length=1, max_length=80)
     phone: str = Field(pattern=r"^\+[1-9]\d{1,14}$")

@@ -12,6 +12,7 @@ the active event loop and asyncpg's "different loop" check passes.
 
 import os
 from collections.abc import AsyncGenerator
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
@@ -20,7 +21,7 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-_engine_kwargs: dict = {
+_engine_kwargs: dict[str, Any] = {
     "echo": settings.DB_ECHO,
     "pool_pre_ping": True,
 }

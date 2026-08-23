@@ -138,7 +138,7 @@ def create_app() -> FastAPI:
     app.state.limiter = limiter
 
     @app.exception_handler(RateLimitExceeded)
-    async def rate_limit_handler(  # type: ignore[no-untyped-def]
+    async def rate_limit_handler(
         request: Request, exc: RateLimitExceeded
     ) -> JSONResponse:
         return JSONResponse(

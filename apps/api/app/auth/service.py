@@ -81,70 +81,80 @@ def user_can_link_google(user: User) -> bool:
 
 
 async def build_profile_for_user(session: AsyncSession, user: User) -> dict[str, Any] | None:
-    """Load the user's role-specific profile, return as a serializable dict."""
+    """Load the user's role-specific profile, return as a serializable dict.
+
+    Each branch loads its own typed local (customer_prof, courier_prof, ...)
+    and uses it directly in the return dict, so mypy narrows the type
+    correctly per branch. Sharing one ``prof`` variable across branches
+    confuses the type checker.
+    """
     if user.user_type == UserType.customer:
         from app.users.models import CustomerProfile
 
-        prof = (
-            await session.execute(select(CustomerProfile).where(CustomerProfile.user_id == user.id))
+        customer_prof: CustomerProfile | None = (
+            await session.execute(
+                select(CustomerProfile).where(CustomerProfile.user_id == user.id)
+            )
         ).scalar_one_or_none()
-        if prof is None:
+        if customer_prof is None:
             return None
         return {
-            "current_location": prof.current_location,  # raw geography; routes serialize on read
-            "date_of_birth": prof.date_of_birth.isoformat() if prof.date_of_birth else None,
-            "order_stats": prof.order_stats or {},
+            "current_location": customer_prof.current_location,  # raw geography; routes serialize
+            "date_of_birth": customer_prof.date_of_birth.isoformat() if customer_prof.date_of_birth else None,
+            "order_stats": customer_prof.order_stats or {},
         }
     if user.user_type == UserType.courier:
         from app.users.models import CourierProfile
 
-        prof = (
-            await session.execute(select(CourierProfile).where(CourierProfile.user_id == user.id))
+        courier_prof: CourierProfile | None = (
+            await session.execute(
+                select(CourierProfile).where(CourierProfile.user_id == user.id)
+            )
         ).scalar_one_or_none()
-        if prof is None:
+        if courier_prof is None:
             return None
         return {
-            "vehicle_type": prof.vehicle_type.value,
-            "license_number": prof.license_number,
-            "is_available": prof.is_available,
-            "is_approved": prof.is_approved,
-            "rating": float(prof.rating or 0),
-            "total_deliveries": prof.total_deliveries,
-            "earnings_balance": float(prof.earnings_balance or 0),
+            "vehicle_type": courier_prof.vehicle_type.value,
+            "license_number": courier_prof.license_number,
+            "is_available": courier_prof.is_available,
+            "is_approved": courier_prof.is_approved,
+            "rating": float(courier_prof.rating or 0),
+            "total_deliveries": courier_prof.total_deliveries,
+            "earnings_balance": float(courier_prof.earnings_balance or 0),
         }
     if user.user_type == UserType.restaurant:
         from app.users.models import RestaurantProfile
 
-        prof = (
+        restaurant_prof: RestaurantProfile | None = (
             await session.execute(
                 select(RestaurantProfile).where(RestaurantProfile.user_id == user.id)
             )
         ).scalar_one_or_none()
-        if prof is None:
+        if restaurant_prof is None:
             return None
         return {
-            "restaurant_name": prof.restaurant_name,
-            "business_license": prof.business_license,
-            "address": prof.address,
-            "rating": float(prof.rating or 0),
-            "is_approved": prof.is_approved,
-            "is_active": prof.is_active,
+            "restaurant_name": restaurant_prof.restaurant_name,
+            "business_license": restaurant_prof.business_license,
+            "address": restaurant_prof.address,
+            "rating": float(restaurant_prof.rating or 0),
+            "is_approved": restaurant_prof.is_approved,
+            "is_active": restaurant_prof.is_active,
         }
     if user.user_type == UserType.restaurant_staff:
         from app.users.models import RestaurantStaffProfile
 
-        prof = (
+        staff_prof: RestaurantStaffProfile | None = (
             await session.execute(
                 select(RestaurantStaffProfile).where(RestaurantStaffProfile.user_id == user.id)
             )
         ).scalar_one_or_none()
-        if prof is None:
+        if staff_prof is None:
             return None
         return {
-            "restaurant_id": str(prof.restaurant_id),
-            "role": prof.role.value,
-            "is_active": prof.is_active,
-            "date_joined": prof.date_joined.isoformat() if prof.date_joined else None,
+            "restaurant_id": str(staff_prof.restaurant_id),
+            "role": staff_prof.role.value,
+            "is_active": staff_prof.is_active,
+            "date_joined": staff_prof.date_joined.isoformat() if staff_prof.date_joined else None,
         }
     return None
 
@@ -173,33 +183,33 @@ async def update_profile(
     profile_data = data.get("profile_data") or {}
     if profile_data:
         if user.user_type == UserType.courier:
-            row = (
+            courier_row: CourierProfile | None = (
                 await session.execute(
                     select(CourierProfile).where(CourierProfile.user_id == user.id)
                 )
             ).scalar_one_or_none()
-            if row is not None:
+            if courier_row is not None:
                 for key in ("vehicle_type", "license_number", "is_available"):
                     if key in profile_data:
-                        setattr(row, key, profile_data[key])
+                        setattr(courier_row, key, profile_data[key])
         elif user.user_type == UserType.customer:
-            row = (
+            customer_row: CustomerProfile | None = (
                 await session.execute(
                     select(CustomerProfile).where(CustomerProfile.user_id == user.id)
                 )
             ).scalar_one_or_none()
-            if row is not None and "date_of_birth" in profile_data:
-                row.date_of_birth = profile_data["date_of_birth"]
+            if customer_row is not None and "date_of_birth" in profile_data:
+                customer_row.date_of_birth = profile_data["date_of_birth"]
         elif user.user_type == UserType.restaurant:
-            row = (
+            restaurant_row: RestaurantProfile | None = (
                 await session.execute(
                     select(RestaurantProfile).where(RestaurantProfile.user_id == user.id)
                 )
             ).scalar_one_or_none()
-            if row is not None:
+            if restaurant_row is not None:
                 for key in ("restaurant_name", "address", "opening_hours"):
                     if key in profile_data:
-                        setattr(row, key, profile_data[key])
+                        setattr(restaurant_row, key, profile_data[key])
     await session.flush()
     await session.refresh(user)
     return user
