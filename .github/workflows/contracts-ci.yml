@@ -42,6 +42,7 @@ jobs:
           JWT_SECRET: test-secret
         run: uv run alembic upgrade head
       - name: Generate OpenAPI
+        working-directory: apps/api
         env:
           DB_HOST: localhost
           DB_PORT: "5432"
@@ -49,11 +50,11 @@ jobs:
           DB_PASSWORD: password
           DB_NAME: fudgo_contracts
           JWT_SECRET: test-secret
-        run: python tools/scripts/generate_openapi.py
+        run: uv run python ../../tools/scripts/generate_openapi.py
       - name: Check for drift
         run: |
           if ! git diff --exit-code packages/api-contracts/openapi.json; then
             echo "::error::OpenAPI spec changed but packages/api-contracts/openapi.json was not updated."
-            echo "::error::Run 'python tools/scripts/generate_openapi.py' locally and commit the result."
+            echo "::error::Run 'uv run python tools/scripts/generate_openapi.py' locally and commit the result."
             exit 1
           fi
