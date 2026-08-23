@@ -4,14 +4,15 @@ import hashlib
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from sqlalchemy import select
 
 from app.auth.models import EmailVerification
 from app.auth.otp_service import (
+    create_email_otp,
     generate_otp,
     verify_email_otp,
-    create_email_otp,
 )
-from sqlalchemy import select
+from app.core.exceptions import AuthenticationError, ConflictError
 
 
 @pytest.mark.asyncio
@@ -41,9 +42,7 @@ async def test_verify_otp_existing_user_returns_tokens(client, make_user, db_ses
     plain, _ = await create_email_otp(db_session, user.email)
     await db_session.commit()
 
-    verify = await client.post(
-        "/api/v2/auth/verify-otp", json={"email": user.email, "otp": plain}
-    )
+    verify = await client.post("/api/v2/auth/verify-otp", json={"email": user.email, "otp": plain})
     assert verify.status_code == 200
     body = verify.json()
     assert body["data"]["user_exists"] is True
@@ -58,9 +57,7 @@ async def test_verify_otp_can_use_access_to_call_profile(client, make_user, db_s
     plain, _ = await create_email_otp(db_session, user.email)
     await db_session.commit()
 
-    verify = await client.post(
-        "/api/v2/auth/verify-otp", json={"email": user.email, "otp": plain}
-    )
+    verify = await client.post("/api/v2/auth/verify-otp", json={"email": user.email, "otp": plain})
     access = verify.json()["data"]["tokens"]["access"]
 
     profile = await client.get(
@@ -81,9 +78,7 @@ async def test_verify_otp_wrong_attempts_increment(db_session):
 
     row = (
         await db_session.execute(
-            select(EmailVerification).where(
-                EmailVerification.email == "attempts@example.com"
-            )
+            select(EmailVerification).where(EmailVerification.email == "attempts@example.com")
         )
     ).scalar_one()
     assert row.attempts == 1
@@ -95,13 +90,11 @@ async def test_verify_otp_locks_after_five_attempts(db_session):
     await db_session.commit()
     # Five wrong attempts → 6th should lock.
     for _ in range(5):
-        with pytest.raises(Exception):
+        with pytest.raises((AuthenticationError, ConflictError)):
             await verify_email_otp(db_session, "lock@example.com", "000000")
     row = (
         await db_session.execute(
-            select(EmailVerification).where(
-                EmailVerification.email == "lock@example.com"
-            )
+            select(EmailVerification).where(EmailVerification.email == "lock@example.com")
         )
     ).scalar_one()
     assert row.attempts == 5

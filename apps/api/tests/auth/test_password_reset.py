@@ -15,15 +15,13 @@ async def test_password_reset_request(client, make_user, db_session):
     # Stub the service function so it doesn't try to log (and to verify
     # it was awaited with the right email). Use AsyncMock so the
     # BackgroundTasks await succeeds.
-    from unittest.mock import AsyncMock, patch
+    from unittest.mock import AsyncMock
 
     with patch(
         "app.auth.router.email_service.send_password_reset",
         new=AsyncMock(),
     ) as mock_send:
-        resp = await client.post(
-            "/api/v2/auth/password-reset", json={"email": user.email}
-        )
+        resp = await client.post("/api/v2/auth/password-reset", json={"email": user.email})
         assert resp.status_code == 200
         assert mock_send.called
 
@@ -46,16 +44,15 @@ async def test_password_reset_confirm(client, make_user, db_session):
 
     from app.users.models import User
 
-    fresh = (
-        await db_session.execute(select(User).where(User.id == user.id))
-    ).scalar_one()
+    fresh = (await db_session.execute(select(User).where(User.id == user.id))).scalar_one()
     assert verify_password("newpassword123", fresh.password_hash)
 
 
 @pytest.mark.asyncio
 async def test_password_reset_expired_token(client, make_user, db_session):
-    from jose import jwt
     import datetime as _dt
+
+    from jose import jwt
 
     from app.core.config import get_settings
 
@@ -94,11 +91,7 @@ async def test_password_reset_tampered_token(client):
 @pytest.mark.asyncio
 async def test_password_reset_throttle(client):
     for _ in range(3):
-        r = await client.post(
-            "/api/v2/auth/password-reset", json={"email": "anon@example.com"}
-        )
+        r = await client.post("/api/v2/auth/password-reset", json={"email": "anon@example.com"})
         assert r.status_code == 200
-    fourth = await client.post(
-        "/api/v2/auth/password-reset", json={"email": "anon@example.com"}
-    )
+    fourth = await client.post("/api/v2/auth/password-reset", json={"email": "anon@example.com"})
     assert fourth.status_code == 429

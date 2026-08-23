@@ -7,27 +7,23 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth import service as auth_service
 from app.auth.deps import get_session, require_role
 from app.auth.passwords import hash_password
 from app.core.envelope import success_envelope
 from app.core.exceptions import NotFoundError, PermissionError
+from app.users import service as user_service
 from app.users.enums import AuthProvider, StaffRole, UserType
 from app.users.models import (
-    Address,
     RestaurantProfile,
     RestaurantStaffProfile,
     User,
 )
 from app.users.schemas import (
     AddressCreate,
-    AddressResponse,
     AddressUpdate,
     RestaurantStaffCreate,
-    RestaurantStaffResponse,
     RestaurantStaffUpdate,
 )
-from app.users import service as user_service
 
 router = APIRouter()
 
@@ -35,6 +31,7 @@ router = APIRouter()
 # ---------------------------------------------------------------------------
 # addresses
 # ---------------------------------------------------------------------------
+
 
 @router.get("/users/addresses")
 async def list_addresses(
@@ -51,9 +48,7 @@ async def create_address(
     current: User = Depends(require_role()),
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
-    row = await user_service.create_address(
-        session, current.id, payload.model_dump()
-    )
+    row = await user_service.create_address(session, current.id, payload.model_dump())
     await session.commit()
     return success_envelope(user_service.serialize_address(row))
 
@@ -89,22 +84,17 @@ async def delete_address(
 # staff management (restaurant owners)
 # ---------------------------------------------------------------------------
 
-async def _caller_restaurant(
-    session: AsyncSession, user: User
-) -> RestaurantProfile:
+
+async def _caller_restaurant(session: AsyncSession, user: User) -> RestaurantProfile:
     prof = (
-        await session.execute(
-            select(RestaurantProfile).where(RestaurantProfile.user_id == user.id)
-        )
+        await session.execute(select(RestaurantProfile).where(RestaurantProfile.user_id == user.id))
     ).scalar_one_or_none()
     if prof is None:
         raise PermissionError("Only restaurants can manage staff")
     return prof
 
 
-def _serialize_staff(
-    user: User, profile: RestaurantStaffProfile
-) -> dict[str, Any]:
+def _serialize_staff(user: User, profile: RestaurantStaffProfile) -> dict[str, Any]:
     return {
         "id": str(profile.id),
         "user_id": str(profile.user_id),

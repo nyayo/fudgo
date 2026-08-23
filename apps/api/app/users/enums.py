@@ -3,14 +3,14 @@
 import enum
 
 
-class UserType(str, enum.Enum):
+class UserType(enum.StrEnum):
     customer = "customer"
     courier = "courier"
     restaurant = "restaurant"
     restaurant_staff = "restaurant_staff"
 
 
-class AuthProvider(str, enum.Enum):
+class AuthProvider(enum.StrEnum):
     email = "email"
     phone = "phone"
     google = "google"
@@ -18,19 +18,19 @@ class AuthProvider(str, enum.Enum):
     linkedin = "linkedin"
 
 
-class VehicleType(str, enum.Enum):
+class VehicleType(enum.StrEnum):
     bike = "bike"
     motorcycle = "motorcycle"
     car = "car"
 
 
-class StaffRole(str, enum.Enum):
+class StaffRole(enum.StrEnum):
     manager = "manager"
     waiter = "waiter"
     cashier = "cashier"
 
 
-class DevicePlatform(str, enum.Enum):
+class DevicePlatform(enum.StrEnum):
     android = "android"
     ios = "ios"
     web = "web"

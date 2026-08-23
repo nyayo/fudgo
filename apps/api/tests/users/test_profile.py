@@ -3,11 +3,11 @@
 import pytest
 
 from app.auth.jwt import create_access_token
+from app.users.enums import VehicleType
 
 
 @pytest.mark.asyncio
 async def test_get_profile_includes_role_profile(client, make_user, db_session):
-    from sqlalchemy import select
 
     from app.users.models import CustomerProfile
 
@@ -48,7 +48,8 @@ async def test_patch_profile_role_specific(client, make_user, db_session):
         user_type=UserType.courier,
     )
     profile = CourierProfile(
-        user_id=user.id, vehicle_type=__import__("app.users.enums", fromlist=["VehicleType"]).VehicleType.bike
+        user_id=user.id,
+        vehicle_type=VehicleType.bike,
     )
     db_session.add(profile)
     await db_session.commit()

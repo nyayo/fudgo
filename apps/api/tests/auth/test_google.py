@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 from sqlalchemy import select
 
+from app.core.exceptions import AuthenticationError
 from app.users.models import User
 from tests.helpers import assert_success
 
@@ -21,12 +22,8 @@ def fake_claims():
 
 
 @pytest.mark.asyncio
-async def test_google_signin_new_user_creates_account(
-    client, db_session, fake_claims
-):
-    with patch(
-        "app.auth.router.verify_google_id_token", return_value=fake_claims
-    ):
+async def test_google_signin_new_user_creates_account(client, db_session, fake_claims):
+    with patch("app.auth.router.verify_google_id_token", return_value=fake_claims):
         r = await client.post(
             "/api/v2/auth/google",
             json={"id_token": "fake", "user_type": "customer"},
@@ -89,9 +86,7 @@ async def test_google_signin_provider_switch(client, db_session, make_user):
 async def test_google_signin_invalid_token(client):
     with patch(
         "app.auth.router.verify_google_id_token",
-        side_effect=__import__("app.core.exceptions", fromlist=["AuthenticationError"]).AuthenticationError(
-            "Invalid Google ID token"
-        ),
+        side_effect=AuthenticationError("Invalid Google ID token"),
     ):
         r = await client.post("/api/v2/auth/google", json={"id_token": "bad"})
     assert r.status_code == 401

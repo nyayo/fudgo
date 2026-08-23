@@ -4,10 +4,10 @@ from collections.abc import Callable
 
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.jwt import decode_token
 from app.auth.models import RevokedToken
@@ -15,7 +15,6 @@ from app.core.exceptions import AuthenticationError, PermissionError
 from app.db.session import get_session as get_db_session
 from app.users.enums import UserType
 from app.users.models import User
-
 
 # Re-exported convenience name so route modules can do
 # ``from app.auth.deps import get_session``.
@@ -56,9 +55,7 @@ async def get_current_user(
     payload = decode_token(token, expected_type="access")
     if await logout_all_revoked(session, payload.sub):
         raise AuthenticationError("Token revoked")
-    user = (
-        await session.execute(select(User).where(User.id == payload.sub))
-    ).scalar_one_or_none()
+    user = (await session.execute(select(User).where(User.id == payload.sub))).scalar_one_or_none()
     if user is None or not user.is_active:
         raise AuthenticationError("User not found or inactive")
     return user

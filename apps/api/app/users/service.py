@@ -11,7 +11,7 @@ from typing import Any
 
 from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.passwords import hash_password
@@ -35,6 +35,7 @@ def now_utc() -> datetime:
 # ---------------------------------------------------------------------------
 # serialization helpers
 # ---------------------------------------------------------------------------
+
 
 def _point_to_coords(value: Any) -> list[float] | None:
     """Convert a stored geography to [lng, lat]; None if null/empty."""
@@ -64,6 +65,7 @@ def build_profile_dict(user: User) -> dict[str, Any] | None:
 # username generation
 # ---------------------------------------------------------------------------
 
+
 def _base_username(user_type: UserType, email: str | None, phone: str | None) -> str:
     key = email.split("@")[0] if email else (phone or "user")
     key = "".join(ch for ch in key if ch.isalnum()).lower() or "user"
@@ -83,9 +85,7 @@ async def generate_unique_username(
     base = _base_username(user_type, email, phone)
     candidate = base
     for _ in range(10):
-        exists = (
-            await session.execute(select(User.id).where(User.username == candidate))
-        ).first()
+        exists = (await session.execute(select(User.id).where(User.username == candidate))).first()
         if exists is None:
             return candidate
         candidate = f"{base}_{uuid.uuid4().hex[:6]}"
@@ -95,6 +95,7 @@ async def generate_unique_username(
 # ---------------------------------------------------------------------------
 # registration
 # ---------------------------------------------------------------------------
+
 
 async def create_user_on_registration(
     session: AsyncSession,
@@ -159,7 +160,9 @@ async def create_user_on_registration(
             RestaurantProfile(
                 user_id=user.id,
                 restaurant_name=profile_data.get("restaurant_name") or "My Restaurant",
-                business_license=profile_data.get("business_license") or f"LIC-{uuid.uuid4().hex[:10]}",
+                business_license=(
+                    profile_data.get("business_license") or f"LIC-{uuid.uuid4().hex[:10]}"
+                ),
                 address=profile_data.get("address") or "",
                 location=from_shape(Point(loc[0], loc[1]), srid=4326),
                 opening_hours={},
@@ -183,6 +186,7 @@ async def create_user_on_registration(
 # notification preferences
 # ---------------------------------------------------------------------------
 
+
 async def get_notifications(session: AsyncSession, user_id: uuid.UUID) -> NotificationPreference:
     pref = (
         await session.execute(
@@ -200,12 +204,17 @@ async def get_notifications(session: AsyncSession, user_id: uuid.UUID) -> Notifi
 # addresses
 # ---------------------------------------------------------------------------
 
+
 async def list_addresses(session: AsyncSession, user_id: uuid.UUID) -> list[Address]:
     rows = (
-        await session.execute(
-            select(Address).where(Address.user_id == user_id).order_by(Address.created_at)
+        (
+            await session.execute(
+                select(Address).where(Address.user_id == user_id).order_by(Address.created_at)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return list(rows)
 
 
@@ -239,7 +248,9 @@ async def create_address(
     return row
 
 
-async def get_own_address(session: AsyncSession, user_id: uuid.UUID, address_id: uuid.UUID) -> Address:
+async def get_own_address(
+    session: AsyncSession, user_id: uuid.UUID, address_id: uuid.UUID
+) -> Address:
     row = (
         await session.execute(
             select(Address).where(Address.id == address_id, Address.user_id == user_id)

@@ -116,8 +116,9 @@ def make_otp():
     """Return (plain, hash) for a freshly generated 6-digit OTP."""
 
     def _make() -> tuple[str, str]:
-        from app.auth.otp_service import generate_otp
         import hashlib
+
+        from app.auth.otp_service import generate_otp
 
         plain = generate_otp()
         return plain, hashlib.sha256(plain.encode("utf-8")).hexdigest()

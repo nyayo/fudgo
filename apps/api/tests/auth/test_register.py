@@ -5,7 +5,6 @@ from sqlalchemy import select
 
 from app.users.enums import UserType
 from app.users.models import (
-    Address,
     CourierProfile,
     CustomerProfile,
     NotificationPreference,
@@ -38,16 +37,12 @@ async def test_register_customer(client, db_session):
     assert user.user_type == UserType.customer
     assert user.is_verified is False
     profile = (
-        await db_session.execute(
-            select(CustomerProfile).where(CustomerProfile.user_id == user.id)
-        )
+        await db_session.execute(select(CustomerProfile).where(CustomerProfile.user_id == user.id))
     ).scalar_one()
     assert profile.user_id == user.id
     pref = (
         await db_session.execute(
-            select(NotificationPreference).where(
-                NotificationPreference.user_id == user.id
-            )
+            select(NotificationPreference).where(NotificationPreference.user_id == user.id)
         )
     ).scalar_one()
     assert pref.receive_push is True
@@ -71,9 +66,7 @@ async def test_register_courier(client, db_session):
         await db_session.execute(select(User).where(User.email == "cou@example.com"))
     ).scalar_one()
     prof = (
-        await db_session.execute(
-            select(CourierProfile).where(CourierProfile.user_id == user.id)
-        )
+        await db_session.execute(select(CourierProfile).where(CourierProfile.user_id == user.id))
     ).scalar_one()
     assert prof.vehicle_type.value == "motorcycle"
 
@@ -158,9 +151,7 @@ async def test_register_username_collision(client, db_session):
             assert r.status_code == 200
         else:
             assert r.status_code == 409
-    users = (
-        await db_session.execute(select(User).where(User.email == base))
-    ).scalars().all()
+    users = (await db_session.execute(select(User).where(User.email == base))).scalars().all()
     assert len(users) == 1
 
 
@@ -177,7 +168,5 @@ async def test_register_phone_sets_verified(client, db_session):
         },
     )
     assert r.status_code == 200
-    user = (
-        await db_session.execute(select(User).where(User.phone == "+14155557777"))
-    ).scalar_one()
+    user = (await db_session.execute(select(User).where(User.phone == "+14155557777"))).scalar_one()
     assert user.is_verified is True

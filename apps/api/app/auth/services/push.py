@@ -9,13 +9,19 @@ logger = logging.getLogger("fudgo.auth.push")
 async def register(user_id: UUID, registration_id: str, platform: str) -> None:
     """Phase 1 stub. Phase 6 wires FCM/APNs."""
     logger.info(
-        "push device register", extra={"user_id": str(user_id), "registration_id": registration_id, "platform": platform}
+        "push device register",
+        extra={
+            "user_id": str(user_id),
+            "registration_id": registration_id,
+            "platform": platform,
+        },
     )
 
 
 async def unregister(user_id: UUID, registration_id: str) -> None:
     logger.info(
-        "push device unregister", extra={"user_id": str(user_id), "registration_id": registration_id}
+        "push device unregister",
+        extra={"user_id": str(user_id), "registration_id": registration_id},
     )
 
 

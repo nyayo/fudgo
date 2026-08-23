@@ -12,21 +12,18 @@ from app.auth.otp_service import (
     generate_otp,
     verify_phone_otp,
 )
+from app.core.exceptions import AuthenticationError, ConflictError
 from app.users.enums import AuthProvider, UserType
 from app.users.models import User
 
 
 @pytest.mark.asyncio
 async def test_request_phone_otp_happy(client, db_session):
-    r = await client.post(
-        "/api/v2/auth/phone/request-otp", json={"phone": "+14155551234"}
-    )
+    r = await client.post("/api/v2/auth/phone/request-otp", json={"phone": "+14155551234"})
     assert r.status_code == 200
     row = (
         await db_session.execute(
-            select(PhoneVerification).where(
-                PhoneVerification.phone == "+14155551234"
-            )
+            select(PhoneVerification).where(PhoneVerification.phone == "+14155551234")
         )
     ).scalar_one()
     assert row.otp
@@ -34,9 +31,7 @@ async def test_request_phone_otp_happy(client, db_session):
 
 @pytest.mark.asyncio
 async def test_request_phone_otp_invalid(client):
-    r = await client.post(
-        "/api/v2/auth/phone/request-otp", json={"phone": "not-e164"}
-    )
+    r = await client.post("/api/v2/auth/phone/request-otp", json={"phone": "not-e164"})
     assert r.status_code == 422
 
 
@@ -88,7 +83,7 @@ async def test_verify_phone_otp_locks_after_five_attempts(db_session):
     plain, _ = await create_phone_otp(db_session, "+14155552222")
     await db_session.commit()
     for _ in range(5):
-        with pytest.raises(Exception):
+        with pytest.raises((AuthenticationError, ConflictError)):
             await verify_phone_otp(db_session, "+14155552222", "000000")
     row = (
         await db_session.execute(

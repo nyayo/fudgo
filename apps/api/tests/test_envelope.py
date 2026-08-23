@@ -1,18 +1,11 @@
 """Envelope shape: every error returns {success:false, error:{code,message,details}}."""
 
 import pytest
-from sqlalchemy import select
-
-from app.auth.otp_service import generate_otp
-from app.auth.passwords import hash_password
-from app.users.models import User
 
 
 @pytest.mark.asyncio
 async def test_validation_error_envelope(client):
-    r = await client.post(
-        "/api/v2/auth/request-otp", json={"email": "bad"}
-    )
+    r = await client.post("/api/v2/auth/request-otp", json={"email": "bad"})
     assert r.status_code == 422
     body = r.json()
     assert body["success"] is False
@@ -23,11 +16,9 @@ async def test_validation_error_envelope(client):
 
 @pytest.mark.asyncio
 async def test_auth_error_envelope(client, make_user, db_session):
-    user = await make_user(db_session, email="ae@example.com")
+    await make_user(db_session, email="ae@example.com")
     await db_session.commit()
-    r = await client.get(
-        "/api/v2/auth/profile", headers={"Authorization": "Bearer not-a-token"}
-    )
+    r = await client.get("/api/v2/auth/profile", headers={"Authorization": "Bearer not-a-token"})
     assert r.status_code == 401
     body = r.json()
     assert body["success"] is False

@@ -21,9 +21,7 @@ from app.users.enums import (
 
 def geog_point(nullable: bool = True, **kwargs: Any) -> Column[Any]:
     """Geography POINT srid=4326 column helper (meter-based distances, v1 parity)."""
-    return Column(
-        Geography(geometry_type="POINT", srid=4326), nullable=nullable, **kwargs
-    )
+    return Column(Geography(geometry_type="POINT", srid=4326), nullable=nullable, **kwargs)
 
 
 class User(SQLModel, table=True):

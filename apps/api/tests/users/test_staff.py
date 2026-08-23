@@ -17,9 +17,7 @@ async def test_customer_cannot_manage_staff(client, make_user, db_session):
 
 @pytest.mark.asyncio
 async def test_restaurant_owner_can_create_and_list_staff(client, make_user, db_session):
-    owner = await make_user(
-        db_session, email="owner@example.com", user_type=UserType.restaurant
-    )
+    owner = await make_user(db_session, email="owner@example.com", user_type=UserType.restaurant)
     from app.users.models import RestaurantProfile
 
     db_session.add(

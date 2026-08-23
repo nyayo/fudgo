@@ -31,17 +31,16 @@ from app.core.exceptions import (
     AuthenticationError,
     ConflictError,
     NotFoundError,
-    PermissionError,
     ValidationError,
 )
 from app.users.enums import AuthProvider, UserType
 from app.users.models import User
 from app.users.service import create_user_on_registration
 
-
 # ---------------------------------------------------------------------------
 # token issuance
 # ---------------------------------------------------------------------------
+
 
 def issue_token_pair(user_id: uuid.UUID) -> dict[str, str]:
     settings = get_settings()
@@ -81,17 +80,13 @@ def user_can_link_google(user: User) -> bool:
     return user.auth_provider != AuthProvider.google and not user.google_id
 
 
-async def build_profile_for_user(
-    session: AsyncSession, user: User
-) -> dict[str, Any] | None:
+async def build_profile_for_user(session: AsyncSession, user: User) -> dict[str, Any] | None:
     """Load the user's role-specific profile, return as a serializable dict."""
     if user.user_type == UserType.customer:
         from app.users.models import CustomerProfile
 
         prof = (
-            await session.execute(
-                select(CustomerProfile).where(CustomerProfile.user_id == user.id)
-            )
+            await session.execute(select(CustomerProfile).where(CustomerProfile.user_id == user.id))
         ).scalar_one_or_none()
         if prof is None:
             return None
@@ -104,9 +99,7 @@ async def build_profile_for_user(
         from app.users.models import CourierProfile
 
         prof = (
-            await session.execute(
-                select(CourierProfile).where(CourierProfile.user_id == user.id)
-            )
+            await session.execute(select(CourierProfile).where(CourierProfile.user_id == user.id))
         ).scalar_one_or_none()
         if prof is None:
             return None
@@ -142,9 +135,7 @@ async def build_profile_for_user(
 
         prof = (
             await session.execute(
-                select(RestaurantStaffProfile).where(
-                    RestaurantStaffProfile.user_id == user.id
-                )
+                select(RestaurantStaffProfile).where(RestaurantStaffProfile.user_id == user.id)
             )
         ).scalar_one_or_none()
         if prof is None:
@@ -218,29 +209,22 @@ async def update_profile(
 # OTP flows
 # ---------------------------------------------------------------------------
 
-async def request_email_otp(
-    session: AsyncSession, email: str
-) -> tuple[str, dict[str, Any]]:
+
+async def request_email_otp(session: AsyncSession, email: str) -> tuple[str, dict[str, Any]]:
     """Generate an email OTP; return (plain_code, row_dict)."""
     plain, _row = await create_email_otp(session, email)
     return plain, {"email": email, "is_verified": False}
 
 
-async def request_phone_otp(
-    session: AsyncSession, phone: str
-) -> tuple[str, dict[str, Any]]:
+async def request_phone_otp(session: AsyncSession, phone: str) -> tuple[str, dict[str, Any]]:
     plain, _row = await create_phone_otp(session, phone)
     return plain, {"phone": phone, "is_verified": False}
 
 
-async def verify_email_for_login(
-    session: AsyncSession, email: str, otp: str
-) -> dict[str, Any]:
+async def verify_email_for_login(session: AsyncSession, email: str, otp: str) -> dict[str, Any]:
     """Verify an email OTP and either issue tokens or report a need to register."""
     await verify_email_otp(session, email, otp)
-    user = (
-        await session.execute(select(User).where(User.email == email))
-    ).scalar_one_or_none()
+    user = (await session.execute(select(User).where(User.email == email))).scalar_one_or_none()
     if user is None:
         return {
             "verified": True,
@@ -263,14 +247,10 @@ async def verify_email_for_login(
     }
 
 
-async def verify_phone_for_login(
-    session: AsyncSession, phone: str, otp: str
-) -> dict[str, Any]:
+async def verify_phone_for_login(session: AsyncSession, phone: str, otp: str) -> dict[str, Any]:
     """Verify a phone OTP and either issue tokens or report a need to register."""
     await verify_phone_otp(session, phone, otp)
-    user = (
-        await session.execute(select(User).where(User.phone == phone))
-    ).scalar_one_or_none()
+    user = (await session.execute(select(User).where(User.phone == phone))).scalar_one_or_none()
     if user is None:
         return {
             "verified": True,
@@ -297,6 +277,7 @@ async def verify_phone_for_login(
 # registration
 # ---------------------------------------------------------------------------
 
+
 def _assert_phone_verified(phone: str | None) -> None:
     """Pure-decorator callers don't have access to OTP rows here, so we use a
     soft check: if phone is set, we mark is_verified=True downstream. The
@@ -318,9 +299,7 @@ async def register_user(
 ) -> dict[str, Any]:
     """Create the user + role profile, issue tokens."""
     if user_type == UserType.restaurant_staff:
-        raise ValidationError(
-            "Restaurant staff must be created by their restaurant's owner"
-        )
+        raise ValidationError("Restaurant staff must be created by their restaurant's owner")
     if not email and not phone:
         raise ValidationError("Either email or phone is required")
     _assert_phone_verified(phone)
@@ -349,6 +328,7 @@ async def register_user(
 # google oauth
 # ---------------------------------------------------------------------------
 
+
 async def login_with_google(
     session: AsyncSession,
     *,
@@ -362,9 +342,7 @@ async def login_with_google(
     if not email or not google_sub:
         raise AuthenticationError("Google account missing required claims")
 
-    user = (
-        await session.execute(select(User).where(User.email == email))
-    ).scalar_one_or_none()
+    user = (await session.execute(select(User).where(User.email == email))).scalar_one_or_none()
 
     if user is None:
         # New user — only created when an explicit user_type is supplied.
@@ -425,12 +403,11 @@ async def link_google(session: AsyncSession, user: User, claims: dict[str, Any])
 # refresh / logout
 # ---------------------------------------------------------------------------
 
+
 async def refresh_tokens(session: AsyncSession, refresh: str) -> dict[str, str]:
     payload = decode_token(refresh, expected_type="refresh")
     jti_revoked = (
-        await session.execute(
-            select(RevokedToken.id).where(RevokedToken.jti == payload.jti)
-        )
+        await session.execute(select(RevokedToken.id).where(RevokedToken.jti == payload.jti))
     ).first()
     if jti_revoked is not None:
         raise AuthenticationError("Refresh token revoked")
@@ -456,8 +433,7 @@ async def logout(session: AsyncSession, refresh: str) -> None:
     row = RevokedToken(
         jti=payload.jti,
         reason="logout",
-        expires_at=datetime.now(UTC)
-        + timedelta(days=get_settings().JWT_REFRESH_TTL_DAYS),
+        expires_at=datetime.now(UTC) + timedelta(days=get_settings().JWT_REFRESH_TTL_DAYS),
     )
     session.add(row)
     await session.flush()
@@ -480,12 +456,9 @@ async def logout_all(session: AsyncSession, user_id: uuid.UUID) -> None:
 # password reset
 # ---------------------------------------------------------------------------
 
-async def request_password_reset(
-    session: AsyncSession, email: str
-) -> str:
-    user = (
-        await session.execute(select(User).where(User.email == email))
-    ).scalar_one_or_none()
+
+async def request_password_reset(session: AsyncSession, email: str) -> str:
+    user = (await session.execute(select(User).where(User.email == email))).scalar_one_or_none()
     if user is None:
         # Do not leak existence; return a valid token-shaped string anyway.
         # But we still need to know the user id to sign a token. Skip silently.
@@ -493,13 +466,9 @@ async def request_password_reset(
     return create_password_reset_token(user.id)
 
 
-async def confirm_password_reset(
-    session: AsyncSession, token: str, new_password: str
-) -> None:
+async def confirm_password_reset(session: AsyncSession, token: str, new_password: str) -> None:
     payload = decode_token(token, expected_type="password_reset")
-    user = (
-        await session.execute(select(User).where(User.id == payload.sub))
-    ).scalar_one_or_none()
+    user = (await session.execute(select(User).where(User.id == payload.sub))).scalar_one_or_none()
     if user is None:
         raise NotFoundError("User not found")
     user.password_hash = hash_password(new_password)
@@ -510,21 +479,16 @@ async def confirm_password_reset(
 # helpers
 # ---------------------------------------------------------------------------
 
-async def _username_from_email(
-    session: AsyncSession, email: str, user_type: UserType
-) -> str:
+
+async def _username_from_email(session: AsyncSession, email: str, user_type: UserType) -> str:
     from app.users.service import generate_unique_username
 
     return await generate_unique_username(session, user_type, email, None)
 
 
-async def authenticate_email_password(
-    session: AsyncSession, email: str, password: str
-) -> User:
+async def authenticate_email_password(session: AsyncSession, email: str, password: str) -> User:
     """Helper used by tests for password flows (no /auth/login route in brief)."""
-    user = (
-        await session.execute(select(User).where(User.email == email))
-    ).scalar_one_or_none()
+    user = (await session.execute(select(User).where(User.email == email))).scalar_one_or_none()
     if user is None or not user.password_hash or not verify_password(password, user.password_hash):
         raise AuthenticationError("Invalid credentials")
     return user

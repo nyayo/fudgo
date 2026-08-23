@@ -20,9 +20,7 @@ async def test_get_notification_prefs_defaults(client, make_user, db_session):
 
     row = (
         await db_session.execute(
-            select(NotificationPreference).where(
-                NotificationPreference.user_id == user.id
-            )
+            select(NotificationPreference).where(NotificationPreference.user_id == user.id)
         )
     ).scalar_one()
     assert row is not None

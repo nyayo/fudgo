@@ -9,14 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import service as auth_service
 from app.auth.deps import get_current_user, get_session, limiter
 from app.auth.google import verify_google_id_token
-from app.auth.jwt import decode_token
 from app.auth.schemas import (
-    AuthResponse,
     DeviceRegisterSchema,
     GoogleSignInSchema,
     LinkGoogleAccountSchema,
     LogoutSchema,
-    MessageResponse,
     NotificationPreferenceResponse,
     NotificationPreferenceUpdate,
     PasswordResetRequestSchema,
@@ -26,7 +23,6 @@ from app.auth.schemas import (
     SetNewPasswordSchema,
     TokenRefreshSchema,
     TokenResponse,
-    UserProfileResponse,
     UserProfileUpdate,
     VerifyOTPSchema,
     VerifyPhoneOTPSchema,
@@ -36,7 +32,7 @@ from app.auth.services import push as push_service
 from app.auth.services import sms as sms_service
 from app.core.envelope import success_envelope
 from app.users.enums import UserType
-from app.users.models import Device, NotificationPreference, User
+from app.users.models import Device, User
 from app.users.service import get_notifications
 
 router = APIRouter()
@@ -52,6 +48,7 @@ def _client_ip(request: Request) -> str:
 # ---------------------------------------------------------------------------
 # OTP / sign-in
 # ---------------------------------------------------------------------------
+
 
 @router.post("/auth/request-otp")
 @limiter.limit("5/minute")
@@ -174,6 +171,7 @@ async def link_google(
 # JWT lifecycle
 # ---------------------------------------------------------------------------
 
+
 @router.post("/auth/logout")
 async def logout(
     payload: LogoutSchema,
@@ -210,6 +208,7 @@ async def refresh(
 # profile
 # ---------------------------------------------------------------------------
 
+
 @router.get("/auth/profile")
 async def get_profile(
     current: User = Depends(get_current_user),
@@ -234,6 +233,7 @@ async def update_profile(
 # ---------------------------------------------------------------------------
 # password reset
 # ---------------------------------------------------------------------------
+
 
 @router.post("/auth/password-reset")
 @limiter.limit("3/hour")
@@ -263,6 +263,7 @@ async def confirm_password_reset(
 # notification preferences
 # ---------------------------------------------------------------------------
 
+
 @router.get("/auth/notification-preferences")
 async def get_notification_prefs(
     current: User = Depends(get_current_user),
@@ -270,9 +271,7 @@ async def get_notification_prefs(
 ) -> dict[str, Any]:
     pref = await get_notifications(session, current.id)
     await session.commit()
-    return success_envelope(
-        NotificationPreferenceResponse.model_validate(pref).model_dump()
-    )
+    return success_envelope(NotificationPreferenceResponse.model_validate(pref).model_dump())
 
 
 @router.patch("/auth/notification-preferences")
@@ -287,14 +286,13 @@ async def patch_notification_prefs(
         setattr(pref, key, value)
     await session.flush()
     await session.commit()
-    return success_envelope(
-        NotificationPreferenceResponse.model_validate(pref).model_dump()
-    )
+    return success_envelope(NotificationPreferenceResponse.model_validate(pref).model_dump())
 
 
 # ---------------------------------------------------------------------------
 # devices
 # ---------------------------------------------------------------------------
+
 
 @router.post("/auth/devices")
 async def register_device(
@@ -313,9 +311,7 @@ async def register_device(
     await session.flush()
     await push_service.register(current.id, payload.registration_id, payload.platform)
     await session.commit()
-    return success_envelope(
-        {"message": "Device registered", "device_id": str(device.id)}
-    )
+    return success_envelope({"message": "Device registered", "device_id": str(device.id)})
 
 
 @router.delete("/auth/devices/{device_id}")

@@ -20,7 +20,9 @@ def upgrade() -> None:
     # 1. users
     op.create_table(
         "users",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
         sa.Column("email", sa.String(254), nullable=True),
         sa.Column("phone", sa.String(32), nullable=True),
         sa.Column("username", sa.String(64), nullable=False),
@@ -44,8 +46,18 @@ def upgrade() -> None:
         sa.Column("google_id", sa.String(255), nullable=True),
         sa.Column("password_hash", sa.String(255), nullable=True),
         sa.Column("last_login", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.UniqueConstraint("email", name="uq_users_email"),
         sa.UniqueConstraint("phone", name="uq_users_phone"),
         sa.UniqueConstraint("username", name="uq_users_username"),
@@ -61,13 +73,20 @@ def upgrade() -> None:
     # 2. email_verifications
     op.create_table(
         "email_verifications",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
         sa.Column("email", sa.String(254), nullable=False),
         sa.Column("otp", sa.String(128), nullable=False),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("is_verified", sa.Boolean, nullable=False, server_default=sa.text("false")),
         sa.Column("attempts", sa.Integer, nullable=False, server_default="0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
     )
     op.create_index("ix_email_verifications_email", "email_verifications", ["email"])
     op.create_index("ix_email_verifications_expires_at", "email_verifications", ["expires_at"])
@@ -80,13 +99,20 @@ def upgrade() -> None:
     # 3. phone_verifications
     op.create_table(
         "phone_verifications",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
         sa.Column("phone", sa.String(32), nullable=False),
         sa.Column("otp", sa.String(128), nullable=False),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("is_verified", sa.Boolean, nullable=False, server_default=sa.text("false")),
         sa.Column("attempts", sa.Integer, nullable=False, server_default="0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
     )
     op.create_index("ix_phone_verifications_phone", "phone_verifications", ["phone"])
     op.create_index("ix_phone_verifications_expires_at", "phone_verifications", ["expires_at"])
@@ -99,9 +125,16 @@ def upgrade() -> None:
     # 4. revoked_tokens
     op.create_table(
         "revoked_tokens",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
         sa.Column("jti", sa.String(128), nullable=False),
-        sa.Column("revoked_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "revoked_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("reason", sa.String(64), nullable=False, server_default="logout"),
         sa.Column("revoked_at_user", UUID(as_uuid=True), nullable=True),
@@ -117,8 +150,15 @@ def upgrade() -> None:
     # 5. customer_profiles
     op.create_table(
         "customer_profiles",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
+        sa.Column(
+            "user_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column(
             "current_location",
             Geography(geometry_type="POINT", srid=4326),
@@ -136,8 +176,15 @@ def upgrade() -> None:
     # 6. courier_profiles
     op.create_table(
         "courier_profiles",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
+        sa.Column(
+            "user_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column(
             "vehicle_type",
             sa.Enum("bike", "motorcycle", "car", name="vehicletype"),
@@ -151,7 +198,9 @@ def upgrade() -> None:
             Geography(geometry_type="POINT", srid=4326),
             nullable=True,
         ),
-        sa.Column("performance_stats", JSONB, nullable=False, server_default=sa.text("'{}'::jsonb")),
+        sa.Column(
+            "performance_stats", JSONB, nullable=False, server_default=sa.text("'{}'::jsonb")
+        ),
         sa.Column("rating", sa.Numeric(3, 2), nullable=False, server_default="0"),
         sa.Column("total_deliveries", sa.Integer, nullable=False, server_default="0"),
         sa.Column("earnings_balance", sa.Numeric(10, 2), nullable=False, server_default="0"),
@@ -161,7 +210,9 @@ def upgrade() -> None:
     op.create_index("ix_courier_profiles_is_available", "courier_profiles", ["is_available"])
     op.create_index("ix_courier_profiles_is_approved", "courier_profiles", ["is_approved"])
     op.create_index("ix_courier_profiles_rating", "courier_profiles", ["rating"])
-    op.create_index("ix_courier_profiles_total_deliveries", "courier_profiles", ["total_deliveries"])
+    op.create_index(
+        "ix_courier_profiles_total_deliveries", "courier_profiles", ["total_deliveries"]
+    )
     op.execute(
         "CREATE INDEX ix_courier_profiles_current_location ON courier_profiles USING GIST (current_location)"
     )
@@ -169,8 +220,15 @@ def upgrade() -> None:
     # 7. restaurant_profiles
     op.create_table(
         "restaurant_profiles",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
+        sa.Column(
+            "user_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("restaurant_name", sa.String(200), nullable=False),
         sa.Column("business_license", sa.String(120), nullable=False),
         sa.Column("address", sa.Text, nullable=False),
@@ -196,8 +254,15 @@ def upgrade() -> None:
     # 8. restaurant_staff_profiles
     op.create_table(
         "restaurant_staff_profiles",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
+        sa.Column(
+            "user_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column(
             "restaurant_id",
             UUID(as_uuid=True),
@@ -210,10 +275,17 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("is_active", sa.Boolean, nullable=False, server_default=sa.text("true")),
-        sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "date_joined",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
         sa.UniqueConstraint("user_id", name="uq_restaurant_staff_profiles_user_id"),
     )
-    op.create_index("ix_restaurant_staff_profiles_user_id", "restaurant_staff_profiles", ["user_id"])
+    op.create_index(
+        "ix_restaurant_staff_profiles_user_id", "restaurant_staff_profiles", ["user_id"]
+    )
     op.create_index(
         "ix_restaurant_staff_profiles_restaurant_id",
         "restaurant_staff_profiles",
@@ -223,8 +295,15 @@ def upgrade() -> None:
     # 9. addresses
     op.create_table(
         "addresses",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
+        sa.Column(
+            "user_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("label", sa.String(80), nullable=False),
         sa.Column("street", sa.String(200), nullable=False),
         sa.Column("city", sa.String(80), nullable=False),
@@ -234,21 +313,33 @@ def upgrade() -> None:
             Geography(geometry_type="POINT", srid=4326),
             nullable=False,
         ),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
     )
     op.create_index("ix_addresses_user_id", "addresses", ["user_id"])
-    op.execute(
-        "CREATE INDEX ix_addresses_location ON addresses USING GIST (location)"
-    )
+    op.execute("CREATE INDEX ix_addresses_location ON addresses USING GIST (location)")
 
     # 10. notification_preferences
     op.create_table(
         "notification_preferences",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
+        sa.Column(
+            "user_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("receive_push", sa.Boolean, nullable=False, server_default=sa.text("true")),
         sa.Column("receive_email", sa.Boolean, nullable=False, server_default=sa.text("true")),
-        sa.Column("promotions_and_offers", sa.Boolean, nullable=False, server_default=sa.text("true")),
+        sa.Column(
+            "promotions_and_offers", sa.Boolean, nullable=False, server_default=sa.text("true")
+        ),
         sa.Column("new_restaurants", sa.Boolean, nullable=False, server_default=sa.text("true")),
         sa.Column("review_reminders", sa.Boolean, nullable=False, server_default=sa.text("true")),
         sa.UniqueConstraint("user_id", name="uq_notification_preferences_user_id"),
@@ -258,8 +349,15 @@ def upgrade() -> None:
     # 11. devices
     op.create_table(
         "devices",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("uuid_generate_v4()")
+        ),
+        sa.Column(
+            "user_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("registration_id", sa.Text, nullable=False),
         sa.Column(
             "platform",
@@ -267,8 +365,18 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("active", sa.Boolean, nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
     )
     op.create_index("ix_devices_user_id", "devices", ["user_id"])
     op.create_index("ix_devices_registration_id", "devices", ["registration_id"])
@@ -283,7 +391,9 @@ def downgrade() -> None:
     op.execute("DROP INDEX IF EXISTS ix_addresses_location")
     op.drop_index("ix_addresses_user_id", table_name="addresses")
     op.drop_table("addresses")
-    op.drop_index("ix_restaurant_staff_profiles_restaurant_id", table_name="restaurant_staff_profiles")
+    op.drop_index(
+        "ix_restaurant_staff_profiles_restaurant_id", table_name="restaurant_staff_profiles"
+    )
     op.drop_index("ix_restaurant_staff_profiles_user_id", table_name="restaurant_staff_profiles")
     op.drop_table("restaurant_staff_profiles")
     op.execute("DROP INDEX IF EXISTS ix_restaurant_profiles_location")

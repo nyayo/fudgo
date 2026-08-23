@@ -9,9 +9,7 @@ from sqlmodel import Field, SQLModel
 
 class EmailVerification(SQLModel, table=True):
     __tablename__ = "email_verifications"
-    __table_args__ = (
-        Index("ix_email_verifications_email_is_verified", "email", "is_verified"),
-    )
+    __table_args__ = (Index("ix_email_verifications_email_is_verified", "email", "is_verified"),)
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     email: str = Field(index=True, nullable=False)
@@ -28,9 +26,7 @@ class EmailVerification(SQLModel, table=True):
 
 class PhoneVerification(SQLModel, table=True):
     __tablename__ = "phone_verifications"
-    __table_args__ = (
-        Index("ix_phone_verifications_phone_is_verified", "phone", "is_verified"),
-    )
+    __table_args__ = (Index("ix_phone_verifications_phone_is_verified", "phone", "is_verified"),)
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     phone: str = Field(index=True, nullable=False)
@@ -56,9 +52,7 @@ class RevokedToken(SQLModel, table=True):
     """
 
     __tablename__ = "revoked_tokens"
-    __table_args__ = (
-        Index("ix_revoked_tokens_user_expires", "revoked_at_user", "expires_at"),
-    )
+    __table_args__ = (Index("ix_revoked_tokens_user_expires", "revoked_at_user", "expires_at"),)
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     jti: str = Field(nullable=False, unique=True, index=True)

@@ -59,6 +59,11 @@ ignore = []
 [tool.ruff.lint.per-file-ignores]
 "migrations/**/*.py" = ["E501", "B008"]
 "tests/**/*.py" = ["B008"]
+# FastAPI's Depends()/bearer_scheme()/require_role() in argument defaults is the
+# framework's own idiomatic pattern. Ruff's B008 doesn't understand the call-site
+# magic FastAPI uses to wire dependencies. Allow it in router + deps files only.
+"app/**/router.py" = ["B008"]
+"app/**/deps.py" = ["B008"]
 
 [tool.mypy]
 python_version = "3.12"

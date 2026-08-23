@@ -61,9 +61,7 @@ async def create_phone_otp(session: AsyncSession, phone: str) -> tuple[str, Phon
     return plain, row
 
 
-async def verify_email_otp(
-    session: AsyncSession, email: str, plain_otp: str
-) -> EmailVerification:
+async def verify_email_otp(session: AsyncSession, email: str, plain_otp: str) -> EmailVerification:
     """Verify an email OTP. Raises AuthenticationError on any failure."""
     row = (
         await session.execute(
@@ -92,9 +90,7 @@ async def verify_email_otp(
     return row
 
 
-async def verify_phone_otp(
-    session: AsyncSession, phone: str, plain_otp: str
-) -> PhoneVerification:
+async def verify_phone_otp(session: AsyncSession, phone: str, plain_otp: str) -> PhoneVerification:
     """Verify a phone OTP. Mirrors verify_email_otp."""
     row = (
         await session.execute(

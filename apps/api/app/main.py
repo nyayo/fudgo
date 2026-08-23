@@ -14,6 +14,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -27,7 +28,6 @@ from app.core.middleware import RequestContextMiddleware, TimingMiddleware
 from app.db.session import engine
 from app.health.router import router as health_router
 from app.observability.metrics import setup_metrics
-from slowapi.errors import RateLimitExceeded
 
 logger = structlog.get_logger("fudgo.api")
 

@@ -28,11 +28,7 @@ async def test_address_create_and_postgis_round_trip(client, make_user, db_sessi
     body = r.json()["data"]
     assert body["location"] == [36.8, -1.3]
 
-    row = (
-        await db_session.execute(
-            select(Address).where(Address.user_id == user.id)
-        )
-    ).scalar_one()
+    row = (await db_session.execute(select(Address).where(Address.user_id == user.id))).scalar_one()
     geom = to_shape(row.location)
     assert abs(geom.x - 36.8) < 1e-6
     assert abs(geom.y - (-1.3)) < 1e-6
@@ -67,7 +63,6 @@ async def test_address_list_isolation(client, make_user, db_session):
 
 @pytest.mark.asyncio
 async def test_address_delete_only_own(client, make_user, db_session):
-    from sqlalchemy import select
 
     a = await make_user(db_session, email="aa@example.com")
     b = await make_user(db_session, email="bb@example.com")
