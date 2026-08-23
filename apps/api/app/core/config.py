@@ -105,8 +105,19 @@ class Settings(BaseSettings):
     R2_ACCOUNT_ID: str = ""
     R2_ACCESS_KEY_ID: str = ""
     R2_SECRET_ACCESS_KEY: str = ""
-    R2_BUCKET_NAME: str = ""
+    R2_BUCKET_NAME: str = "fudgo-media"
     R2_CUSTOM_DOMAIN: str = ""
+    R2_REGION: str = "auto"
+    R2_ENDPOINT_URL: str = ""
+    MAX_UPLOAD_SIZE_MB: int = 5
+    ALLOWED_IMAGE_MIME_TYPES: list[str] = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+    ]
+    MAX_IMAGE_DIMENSION_PX: int = 4096
+    DEFAULT_SEARCH_RADIUS_KM: float = 5.0
+    MAX_SEARCH_RADIUS_KM: float = 50.0
     FIREBASE_CREDENTIALS_PATH: str = ""
     TEXTBEE_API_KEY: str = ""
     TEXTBEE_DEVICE_ID: str = ""

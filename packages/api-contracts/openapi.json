@@ -16,9 +16,7 @@
             "type": "string"
           },
           "location": {
-            "additionalProperties": {
-              "type": "number"
-            },
+            "additionalProperties": true,
             "description": "GeoJSON-shaped point: {'type': 'Point', 'coordinates': [lng, lat]}",
             "examples": [
               {
@@ -85,9 +83,7 @@
           "location": {
             "anyOf": [
               {
-                "additionalProperties": {
-                  "type": "number"
-                },
+                "additionalProperties": true,
                 "type": "object"
               },
               {
@@ -123,6 +119,48 @@
           }
         },
         "title": "AddressUpdate",
+        "type": "object"
+      },
+      "Body_attach_category_image_api_v2_restaurants__restaurant_id__categories__category_id__image_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_attach_category_image_api_v2_restaurants__restaurant_id__categories__category_id__image_post",
+        "type": "object"
+      },
+      "Body_attach_item_image_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__images_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_attach_item_image_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__images_post",
+        "type": "object"
+      },
+      "Body_attach_promotion_banner_api_v2_restaurants__restaurant_id__promotions__promotion_id__banner_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_attach_promotion_banner_api_v2_restaurants__restaurant_id__promotions__promotion_id__banner_post",
         "type": "object"
       },
       "DeviceRegisterSchema": {
@@ -231,6 +269,287 @@
         "title": "LogoutSchema",
         "type": "object"
       },
+      "MenuCategoryCreate": {
+        "properties": {
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "position": {
+            "default": 0,
+            "title": "Position",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "MenuCategoryCreate",
+        "type": "object"
+      },
+      "MenuCategoryUpdate": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          }
+        },
+        "title": "MenuCategoryUpdate",
+        "type": "object"
+      },
+      "MenuItemCreate": {
+        "properties": {
+          "allergens": {
+            "default": "",
+            "title": "Allergens",
+            "type": "string"
+          },
+          "category_id": {
+            "format": "uuid",
+            "title": "Category Id",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "is_available": {
+            "default": true,
+            "title": "Is Available",
+            "type": "boolean"
+          },
+          "is_featured": {
+            "default": false,
+            "title": "Is Featured",
+            "type": "boolean"
+          },
+          "prep_time_minutes": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Time Minutes"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "minimum": 0.01,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,11}0*$)\\d{0,8}\\.\\d{0,2}0*$)",
+                "type": "string"
+              }
+            ],
+            "title": "Price"
+          },
+          "promotion_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Promotion Ids",
+            "type": "array"
+          },
+          "restaurant_id": {
+            "format": "uuid",
+            "title": "Restaurant Id",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "restaurant_id",
+          "category_id",
+          "title",
+          "price"
+        ],
+        "title": "MenuItemCreate",
+        "type": "object"
+      },
+      "MenuItemUpdate": {
+        "properties": {
+          "allergens": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allergens"
+          },
+          "category_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "is_available": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Available"
+          },
+          "is_featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Featured"
+          },
+          "prep_time_minutes": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Time Minutes"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "minimum": 0.01,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,11}0*$)\\d{0,8}\\.\\d{0,2}0*$)",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "promotion_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promotion Ids"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "MenuItemUpdate",
+        "type": "object"
+      },
       "NotificationPreferenceUpdate": {
         "properties": {
           "new_restaurants": {
@@ -304,6 +623,130 @@
           "email"
         ],
         "title": "PasswordResetRequestSchema",
+        "type": "object"
+      },
+      "PromotionCreate": {
+        "properties": {
+          "description": {
+            "default": "",
+            "maxLength": 225,
+            "title": "Description",
+            "type": "string"
+          },
+          "discount": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Discount",
+            "type": "number"
+          },
+          "end_date": {
+            "format": "date-time",
+            "title": "End Date",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "start_date": {
+            "format": "date-time",
+            "title": "Start Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "discount",
+          "start_date",
+          "end_date"
+        ],
+        "title": "PromotionCreate",
+        "type": "object"
+      },
+      "PromotionUpdate": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 225,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "discount": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          }
+        },
+        "title": "PromotionUpdate",
         "type": "object"
       },
       "RegisterSchema": {
@@ -513,6 +956,72 @@
           }
         },
         "title": "RestaurantStaffUpdate",
+        "type": "object"
+      },
+      "RestaurantUpdate": {
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "logo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Url"
+          },
+          "opening_hours": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Hours"
+          },
+          "restaurant_name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restaurant Name"
+          }
+        },
+        "title": "RestaurantUpdate",
         "type": "object"
       },
       "SetNewPasswordSchema": {
@@ -1512,6 +2021,2642 @@
         "summary": "Verify Otp",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v2/menu-items": {
+      "get": {
+        "operationId": "list_menu_items_global_api_v2_menu_items_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "restaurant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Restaurant Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_available",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Available"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_featured",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Featured"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ordering",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ordering"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Menu Items Global Api V2 Menu Items Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Menu Items Global",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/v2/menu-items/{item_id}": {
+      "get": {
+        "operationId": "get_menu_item_api_v2_menu_items__item_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Menu Item Api V2 Menu Items  Item Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Menu Item",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/v2/promotions": {
+      "get": {
+        "operationId": "list_promotions_global_api_v2_promotions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "restaurant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Restaurant Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "only_active",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Only Active",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Promotions Global Api V2 Promotions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Promotions Global",
+        "tags": [
+          "catalog"
+        ]
+      },
+      "post": {
+        "operationId": "create_promotion_api_v2_promotions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromotionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Promotion Api V2 Promotions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Promotion",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/v2/promotions/active": {
+      "get": {
+        "operationId": "list_active_promotions_api_v2_promotions_active_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Active Promotions Api V2 Promotions Active Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Active Promotions",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/v2/promotions/{promotion_id}": {
+      "delete": {
+        "operationId": "delete_promotion_api_v2_promotions__promotion_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delete Promotion Api V2 Promotions  Promotion Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Promotion",
+        "tags": [
+          "catalog"
+        ]
+      },
+      "get": {
+        "operationId": "get_promotion_api_v2_promotions__promotion_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Promotion Api V2 Promotions  Promotion Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Promotion",
+        "tags": [
+          "catalog"
+        ]
+      },
+      "patch": {
+        "operationId": "update_promotion_api_v2_promotions__promotion_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromotionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Promotion Api V2 Promotions  Promotion Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Promotion",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/v2/promotions/{promotion_id}/toggle-active": {
+      "post": {
+        "operationId": "toggle_promotion_api_v2_promotions__promotion_id__toggle_active_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Toggle Promotion Api V2 Promotions  Promotion Id  Toggle Active Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Toggle Promotion",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/v2/restaurants": {
+      "get": {
+        "operationId": "list_restaurants_api_v2_restaurants_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Restaurants Api V2 Restaurants Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Restaurants",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/nearby": {
+      "get": {
+        "operationId": "nearby_restaurants_api_v2_restaurants_nearby_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "latitude",
+            "required": true,
+            "schema": {
+              "maximum": 90.0,
+              "minimum": -90.0,
+              "title": "Latitude",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "longitude",
+            "required": true,
+            "schema": {
+              "maximum": 180.0,
+              "minimum": -180.0,
+              "title": "Longitude",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "radius_km",
+            "required": false,
+            "schema": {
+              "default": 5.0,
+              "exclusiveMinimum": 0.0,
+              "title": "Radius Km",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Nearby Restaurants Api V2 Restaurants Nearby Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Nearby Restaurants",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}": {
+      "get": {
+        "operationId": "get_restaurant_api_v2_restaurants__restaurant_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Restaurant Api V2 Restaurants  Restaurant Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Restaurant",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "patch": {
+        "operationId": "update_restaurant_api_v2_restaurants__restaurant_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestaurantUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Restaurant Api V2 Restaurants  Restaurant Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Restaurant",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/categories": {
+      "get": {
+        "operationId": "list_categories_api_v2_restaurants__restaurant_id__categories_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "only_active",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Only Active",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Categories Api V2 Restaurants  Restaurant Id  Categories Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Categories",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "post": {
+        "operationId": "create_category_api_v2_restaurants__restaurant_id__categories_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuCategoryCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Category Api V2 Restaurants  Restaurant Id  Categories Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Category",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/categories/{category_id}": {
+      "delete": {
+        "operationId": "delete_category_api_v2_restaurants__restaurant_id__categories__category_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delete Category Api V2 Restaurants  Restaurant Id  Categories  Category Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Category",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "get": {
+        "operationId": "get_category_api_v2_restaurants__restaurant_id__categories__category_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Category Api V2 Restaurants  Restaurant Id  Categories  Category Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Category",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "patch": {
+        "operationId": "update_category_api_v2_restaurants__restaurant_id__categories__category_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuCategoryUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Category Api V2 Restaurants  Restaurant Id  Categories  Category Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Category",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/categories/{category_id}/image": {
+      "delete": {
+        "operationId": "remove_category_image_api_v2_restaurants__restaurant_id__categories__category_id__image_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "image_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Image Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Remove Category Image Api V2 Restaurants  Restaurant Id  Categories  Category Id  Image Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Category Image",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "post": {
+        "operationId": "attach_category_image_api_v2_restaurants__restaurant_id__categories__category_id__image_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_attach_category_image_api_v2_restaurants__restaurant_id__categories__category_id__image_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Attach Category Image Api V2 Restaurants  Restaurant Id  Categories  Category Id  Image Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Attach Category Image",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/categories/{category_id}/items": {
+      "get": {
+        "operationId": "list_items_in_category_api_v2_restaurants__restaurant_id__categories__category_id__items_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Items In Category Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Items In Category",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "post": {
+        "operationId": "create_item_api_v2_restaurants__restaurant_id__categories__category_id__items_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuItemCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Item Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Item",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/categories/{category_id}/items/{item_id}": {
+      "delete": {
+        "operationId": "delete_item_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delete Item Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items  Item Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Item",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "get": {
+        "operationId": "get_item_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Item Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items  Item Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Item",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "patch": {
+        "operationId": "update_item_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuItemUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Item Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items  Item Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Item",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/categories/{category_id}/items/{item_id}/images": {
+      "get": {
+        "operationId": "list_item_images_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__images_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Item Images Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items  Item Id  Images Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Item Images",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "post": {
+        "operationId": "attach_item_image_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__images_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_attach_item_image_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__images_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Attach Item Image Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items  Item Id  Images Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Attach Item Image",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/categories/{category_id}/items/{item_id}/images/{image_id}": {
+      "delete": {
+        "operationId": "remove_item_image_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__images__image_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "image_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Image Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Remove Item Image Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items  Item Id  Images  Image Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Item Image",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/categories/{category_id}/items/{item_id}/promotions": {
+      "post": {
+        "operationId": "add_item_promotion_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__promotions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add Item Promotion Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items  Item Id  Promotions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Item Promotion",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/categories/{category_id}/items/{item_id}/promotions/{promotion_id}": {
+      "delete": {
+        "operationId": "remove_item_promotion_api_v2_restaurants__restaurant_id__categories__category_id__items__item_id__promotions__promotion_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Category Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Remove Item Promotion Api V2 Restaurants  Restaurant Id  Categories  Category Id  Items  Item Id  Promotions  Promotion Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Item Promotion",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/items": {
+      "get": {
+        "operationId": "list_items_for_restaurant_api_v2_restaurants__restaurant_id__items_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_available",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Available"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_featured",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Featured"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ordering",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ordering"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Items For Restaurant Api V2 Restaurants  Restaurant Id  Items Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Items For Restaurant",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/promotions": {
+      "get": {
+        "operationId": "list_promotions_api_v2_restaurants__restaurant_id__promotions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "only_active",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Only Active",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Promotions Api V2 Restaurants  Restaurant Id  Promotions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Promotions",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "post": {
+        "operationId": "create_promotion_api_v2_restaurants__restaurant_id__promotions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromotionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Promotion Api V2 Restaurants  Restaurant Id  Promotions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Promotion",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/promotions/{promotion_id}": {
+      "delete": {
+        "operationId": "delete_promotion_api_v2_restaurants__restaurant_id__promotions__promotion_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delete Promotion Api V2 Restaurants  Restaurant Id  Promotions  Promotion Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Promotion",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "get": {
+        "operationId": "get_promotion_api_v2_restaurants__restaurant_id__promotions__promotion_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Promotion Api V2 Restaurants  Restaurant Id  Promotions  Promotion Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Promotion",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "patch": {
+        "operationId": "update_promotion_api_v2_restaurants__restaurant_id__promotions__promotion_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromotionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Promotion Api V2 Restaurants  Restaurant Id  Promotions  Promotion Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Promotion",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/promotions/{promotion_id}/banner": {
+      "delete": {
+        "operationId": "remove_promotion_banner_api_v2_restaurants__restaurant_id__promotions__promotion_id__banner_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Remove Promotion Banner Api V2 Restaurants  Restaurant Id  Promotions  Promotion Id  Banner Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Promotion Banner",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "post": {
+        "operationId": "attach_promotion_banner_api_v2_restaurants__restaurant_id__promotions__promotion_id__banner_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_attach_promotion_banner_api_v2_restaurants__restaurant_id__promotions__promotion_id__banner_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Attach Promotion Banner Api V2 Restaurants  Restaurant Id  Promotions  Promotion Id  Banner Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Attach Promotion Banner",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/promotions/{promotion_id}/menu-items": {
+      "get": {
+        "operationId": "list_promotion_items_api_v2_restaurants__restaurant_id__promotions__promotion_id__menu_items_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Promotion Items Api V2 Restaurants  Restaurant Id  Promotions  Promotion Id  Menu Items Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Promotion Items",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v2/restaurants/{restaurant_id}/promotions/{promotion_id}/toggle-active": {
+      "post": {
+        "operationId": "toggle_promotion_api_v2_restaurants__restaurant_id__promotions__promotion_id__toggle_active_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restaurant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Promotion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Toggle Promotion Api V2 Restaurants  Restaurant Id  Promotions  Promotion Id  Toggle Active Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Toggle Promotion",
+        "tags": [
+          "restaurants"
         ]
       }
     },

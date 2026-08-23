@@ -62,3 +62,75 @@ A template lives in `.env.example` (the real `.env` is gitignored).
 | GET    | `/metrics`       | Prometheus text                  |
 | GET    | `/docs`          | Swagger UI                       |
 | GET    | `/redoc`         | ReDoc                            |
+
+## Phase 1 endpoints (auth + users)
+
+| Method | Path | Auth |
+| --- | --- | --- |
+| POST | /api/v2/auth/request-otp | none |
+| POST | /api/v2/auth/verify-otp | none |
+| POST | /api/v2/auth/phone/request-otp | none |
+| POST | /api/v2/auth/phone/verify-otp | none |
+| POST | /api/v2/auth/register | none |
+| POST | /api/v2/auth/google | none |
+| POST | /api/v2/auth/link-google | bearer |
+| POST | /api/v2/auth/logout | bearer |
+| POST | /api/v2/auth/logout-all | bearer |
+| POST | /api/v2/auth/refresh | none |
+| GET  | /api/v2/auth/profile | bearer |
+| PATCH| /api/v2/auth/profile | bearer |
+| POST | /api/v2/auth/password-reset | none |
+| POST | /api/v2/auth/password-reset/confirm | none |
+| GET  | /api/v2/auth/notification-preferences | bearer |
+| PATCH| /api/v2/auth/notification-preferences | bearer |
+| POST | /api/v2/auth/devices | bearer |
+| DELETE| /api/v2/auth/devices/{id} | bearer |
+| POST | /api/v2/auth/test-notification | bearer |
+| GET  | /api/v2/users/addresses | bearer |
+| POST | /api/v2/users/addresses | bearer |
+| PATCH| /api/v2/users/addresses/{id} | bearer |
+| DELETE| /api/v2/users/addresses/{id} | bearer |
+| GET  | /api/v2/users/staff | bearer + role=restaurant |
+| POST | /api/v2/users/staff | bearer + role=restaurant |
+| PATCH| /api/v2/users/staff/{id} | bearer + role=restaurant |
+| DELETE| /api/v2/users/staff/{id} | bearer + role=restaurant |
+
+## Phase 2 endpoints (restaurants + menu + promotions + R2)
+
+| Method | Path | Auth |
+| --- | --- | --- |
+| GET  | /api/v2/restaurants | none |
+| GET  | /api/v2/restaurants/nearby | none |
+| GET  | /api/v2/restaurants/{id} | none |
+| PATCH| /api/v2/restaurants/{id} | bearer + role=restaurant |
+| GET  | /api/v2/restaurants/{id}/categories | none |
+| POST | /api/v2/restaurants/{id}/categories | bearer + owner |
+| GET  | /api/v2/restaurants/{id}/categories/{cid} | none |
+| PATCH| /api/v2/restaurants/{id}/categories/{cid} | bearer + owner |
+| DELETE| /api/v2/restaurants/{id}/categories/{cid} | bearer + owner |
+| POST | /api/v2/restaurants/{id}/categories/{cid}/image | bearer + owner |
+| GET  | /api/v2/restaurants/{id}/items | none |
+| GET  | /api/v2/restaurants/{id}/categories/{cid}/items | none |
+| POST | /api/v2/restaurants/{id}/categories/{cid}/items | bearer + owner |
+| GET  | /api/v2/restaurants/{id}/categories/{cid}/items/{iid} | none |
+| PATCH| /api/v2/restaurants/{id}/categories/{cid}/items/{iid} | bearer + owner |
+| DELETE| /api/v2/restaurants/{id}/categories/{cid}/items/{iid} | bearer + owner |
+| POST | /api/v2/restaurants/{id}/categories/{cid}/items/{iid}/images | bearer + owner |
+| GET  | /api/v2/restaurants/{id}/categories/{cid}/items/{iid}/images | none |
+| DELETE| /api/v2/restaurants/{id}/categories/{cid}/items/{iid}/images/{img_id} | bearer + owner |
+| POST | /api/v2/restaurants/{id}/categories/{cid}/items/{iid}/promotions | bearer + owner |
+| DELETE| /api/v2/restaurants/{id}/categories/{cid}/items/{iid}/promotions/{pid} | bearer + owner |
+| GET  | /api/v2/restaurants/{id}/promotions | none |
+| POST | /api/v2/restaurants/{id}/promotions | bearer + owner |
+| GET  | /api/v2/restaurants/{id}/promotions/{pid} | none |
+| PATCH| /api/v2/restaurants/{id}/promotions/{pid} | bearer + owner |
+| DELETE| /api/v2/restaurants/{id}/promotions/{pid} | bearer + owner |
+| POST | /api/v2/restaurants/{id}/promotions/{pid}/toggle-active | bearer + owner |
+| POST | /api/v2/restaurants/{id}/promotions/{pid}/banner | bearer + owner |
+| DELETE| /api/v2/restaurants/{id}/promotions/{pid}/banner | bearer + owner |
+| GET  | /api/v2/restaurants/{id}/promotions/{pid}/menu-items | none |
+| GET  | /api/v2/menu-items | none |
+| GET  | /api/v2/menu-items/{id} | none |
+| GET  | /api/v2/promotions | none |
+| GET  | /api/v2/promotions/active | none |
+| GET  | /api/v2/promotions/{id} | none |

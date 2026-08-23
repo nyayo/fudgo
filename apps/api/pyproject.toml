@@ -29,6 +29,10 @@ dependencies = [
     "slowapi>=0.1.9",
     "email-validator>=2.0",
     "humanize>=4.9",
+    "aioboto3>=13.0",
+    "python-magic>=0.4.27",
+    "pillow>=10.0",
+    "python-slugify>=8.0",
 ]
 
 [dependency-groups]
@@ -107,7 +111,7 @@ addopts = "-q"
 source = ["app"]
 branch = true
 # db bootstrap code is exercised lazily via routers; required→not enforced by
-# 80% threshold in this phase (Phase 1 exercises it for real).
+# 70% threshold in this phase (Phase 1 exercises it for real).
 omit = [
     "app/db/*",
 ]

@@ -22,12 +22,10 @@ from app.users.models import User
 
 
 @pytest.fixture(autouse=True)
-async def reset_rate_limiter():
+def _sync_limiter_reset():
     """Reset slowapi counters between tests so throttles don't leak."""
     from app.auth.deps import limiter
 
-    limiter.reset()
-    yield
     limiter.reset()
 
 
@@ -40,14 +38,17 @@ def engine() -> None:
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Truncate all Phase-1 tables before each test for isolation.
 
-    Creates its own engine + factory bound to the test loop, disposes both
-    engines afterwards.
+    Reuses the app's async engine (single NullPool connection per call) so
+    asyncpg's cross-loop check passes.
     """
-    settings = get_settings()
-    engine = create_async_engine(settings.DATABASE_URL)
-    factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    from app.db.session import engine as app_engine
+
+    truncate_engine = create_async_engine(get_settings().DATABASE_URL)
+    truncate_factory = async_sessionmaker(
+        truncate_engine, class_=AsyncSession, expire_on_commit=False
+    )
     try:
-        async with factory() as session:
+        async with truncate_factory() as session:
             await session.execute(
                 text(
                     "TRUNCATE TABLE "
@@ -60,14 +61,11 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
             )
             await session.commit()
     finally:
-        await engine.dispose()
+        await truncate_engine.dispose()
 
-    yield_factory = factory
-    async with yield_factory() as session:
+    factory = async_sessionmaker(app_engine, class_=AsyncSession, expire_on_commit=False)
+    async with factory() as session:
         yield session
-
-    # Dispose the second engine too so asyncpg connections don't accumulate.
-    await engine.dispose()
 
 
 @pytest.fixture

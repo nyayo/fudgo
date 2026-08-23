@@ -27,6 +27,7 @@ target_metadata = SQLModel.metadata
 # Phase 1: import models so Alembic sees them in SQLModel.metadata.
 from app.auth import models as _auth_models  # noqa: E402,F401
 from app.users import models as _users_models  # noqa: E402,F401
+from app.restaurants import models as _restaurant_models  # noqa: E402,F401
 
 
 def include_object(object, name, type_, reflected, compare_to):  # type: ignore[no-untyped-def]
