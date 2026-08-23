@@ -134,4 +134,5 @@ def get_storage_service() -> StorageService:
         # lifespan hasn't initialised storage yet (e.g. in tests that
         # forget the override).
         set_storage_service(InMemoryStorageService())
+    assert _storage is not None  # set by the line above
     return _storage

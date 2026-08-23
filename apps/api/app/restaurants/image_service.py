@@ -33,7 +33,7 @@ MIME_TO_EXT = {
 ImageKind = Literal["menu_item", "menu_category", "promotion"]
 
 
-def _settings():
+def _settings() -> Any:
     return get_settings()
 
 
