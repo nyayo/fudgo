@@ -20,10 +20,12 @@ def verify_google_id_token(id_token_str: str) -> dict[str, Any]:
     """
     settings = get_settings()
     try:
-        # google.oauth2.id_token.verify_oauth2_token is loosely typed upstream
-        # (returns Any). We cast at the boundary to keep our function's return
-        # type honest.
-        claims = id_token.verify_oauth2_token(
+        # google.oauth2.id_token.verify_oauth2_token is loosely typed in some
+        # installed versions of google-auth (the stubs are incomplete upstream),
+        # so mypy may flag this as a no-untyped-call depending on which
+        # google-auth is installed. The actual return type is a claims dict;
+        # we cast at the boundary below.
+        claims = id_token.verify_oauth2_token(  # type: ignore[no-untyped-call]
             id_token_str,
             google_requests.Request(),
             audience=settings.GOOGLE_CLIENT_ID or None,

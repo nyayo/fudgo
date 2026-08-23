@@ -88,6 +88,15 @@ disable_error_code = [
     "attr-defined",   # .is_(False), .desc() on column expressions
 ]
 
+# app.auth.google uses id_token.verify_oauth2_token from google-auth, which is
+# typed in some installed versions and untyped in others. The # type: ignore
+# on the call site is needed in CI (where stubs are missing) and may be unused
+# locally (where stubs are present). Disable unused-ignore checks for this
+# file alone so the same code passes in both environments.
+[[tool.mypy.overrides]]
+module = "app.auth.google"
+warn_unused_ignores = false
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
