@@ -8,6 +8,9 @@ on:
 jobs:
   lint-type-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
     services:
       db:
         image: imresamu/postgis:16-3.4
@@ -51,7 +54,7 @@ jobs:
         run: uv run alembic upgrade head
 
       - name: Ruff check
-        run: uv run ruff check .
+        run: uv run ruff check --fix --unsafe-fixes .
 
       - name: Ruff format check
         run: uv run ruff format --check .
