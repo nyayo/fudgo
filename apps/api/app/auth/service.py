@@ -92,24 +92,21 @@ async def build_profile_for_user(session: AsyncSession, user: User) -> dict[str,
         from app.users.models import CustomerProfile
 
         customer_prof: CustomerProfile | None = (
-            await session.execute(
-                select(CustomerProfile).where(CustomerProfile.user_id == user.id)
-            )
+            await session.execute(select(CustomerProfile).where(CustomerProfile.user_id == user.id))
         ).scalar_one_or_none()
         if customer_prof is None:
             return None
+        dob = customer_prof.date_of_birth
         return {
             "current_location": customer_prof.current_location,  # raw geography; routes serialize
-            "date_of_birth": customer_prof.date_of_birth.isoformat() if customer_prof.date_of_birth else None,
+            "date_of_birth": dob.isoformat() if dob else None,
             "order_stats": customer_prof.order_stats or {},
         }
     if user.user_type == UserType.courier:
         from app.users.models import CourierProfile
 
         courier_prof: CourierProfile | None = (
-            await session.execute(
-                select(CourierProfile).where(CourierProfile.user_id == user.id)
-            )
+            await session.execute(select(CourierProfile).where(CourierProfile.user_id == user.id))
         ).scalar_one_or_none()
         if courier_prof is None:
             return None
