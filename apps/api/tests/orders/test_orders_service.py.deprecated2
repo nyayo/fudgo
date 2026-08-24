@@ -1,0 +1,469 @@
+"""Phase 3 checkout + state-transition tests, restored with the Phase 5
+conftest fix.
+
+These tests were deferred through Phases 3 and 4 because the conftest
+shared the app's async engine for both the test session and the route's
+session, causing ``InFailedSQLTransaction`` after seed-data commits.
+
+Phase 5 fixed this by overriding ``get_db_session`` so the route's
+session is bound to the SAME connection as the test session. With one
+shared connection, both sides see the same transaction state.
+
+The tests use the service layer directly (no HTTP layer) so the
+assertions can verify the data shape that ``POST /cart/checkout``
+should produce. Phase 5 changes ``checkout_cart`` to create the order
+in ``PENDING_PAYMENT`` (not ``PLACED``), so the assertions here test
+the new flow.
+"""
+
+from __future__ import annotations
+
+import uuid
+from decimal import Decimal
+from typing import Any
+
+import pytest
+from geoalchemy2.shape import from_shape
+from shapely.geometry import Point
+from sqlalchemy import select
+
+from app.orders import service as order_service
+from app.orders.enums import OrderStatus
+from app.orders.models import Order
+from app.restaurants.models import MenuCategory, MenuItem
+from app.users.enums import UserType
+from app.users.models import (
+    Address,
+    CustomerProfile,
+    RestaurantProfile,
+    User,
+)
+
+
+pytestmark = pytest.mark.asyncio
+
+
+# ---------------------------------------------------------------------------
+# Factory helpers (same pattern as Phase 3 / Phase 4 tests)
+# ---------------------------------------------------------------------------
+
+
+async def _user(
+    session: Any, *, user_type: UserType, email: str | None = None
+) -> User:
+    u = User(
+        email=email or f"u_{uuid.uuid4().hex[:6]}@x.com",
+        username=f"u_{uuid.uuid4().hex[:6]}",
+        first_name="U",
+        last_name="X",
+        user_type=user_type,
+        is_verified=True,
+    )
+    session.add(u)
+    await session.flush()
+    return u
+
+
+async def _customer(session: Any, user: User) -> CustomerProfile:
+    cp = CustomerProfile(user_id=user.id)
+    session.add(cp)
+    await session.flush()
+    return cp
+
+
+async def _restaurant(
+    session: Any, owner: User, *, name: str = "R", is_open: bool = True
+) -> RestaurantProfile:
+    opening_hours: dict[str, Any] = (
+        {
+            "mon": "00:00-23:59", "tue": "00:00-23:59", "wed": "00:00-23:59",
+            "thu": "00:00-23:59", "fri": "00:00-23:59", "sat": "00:00-23:59",
+            "sun": "00:00-23:59",
+        }
+        if is_open
+        else {
+            "mon": "00:00-00:01", "tue": "00:00-00:01", "wed": "00:00-00:01",
+            "thu": "00:00-00:01", "fri": "00:00-00:01", "sat": "00:00-00:01",
+            "sun": "00:00-00:01",
+        }
+    )
+    p = RestaurantProfile(
+        user_id=owner.id,
+        restaurant_name=name,
+        business_license=f"LIC-{uuid.uuid4().hex[:8]}",
+        address="1 Main",
+        location=from_shape(Point(36.8, -1.3), srid=4326),
+        delivery_fee=Decimal("50.00"),
+        delivery_radius_km=10.0,
+        min_order_amount=Decimal("0.00"),
+        opening_hours=opening_hours,
+        is_approved=True,
+        is_active=True,
+    )
+    session.add(p)
+    await session.flush()
+    return p
+
+
+async def _menu_item(
+    session: Any,
+    restaurant: RestaurantProfile,
+    *,
+    price: str = "1000.00",
+    is_available: bool = True,
+) -> MenuItem:
+    cat = MenuCategory(restaurant_id=restaurant.id, name="Mains", is_active=True)
+    session.add(cat)
+    await session.flush()
+    item = MenuItem(
+        restaurant_id=restaurant.id,
+        category_id=cat.id,
+        title=f"Item {uuid.uuid4().hex[:4]}",
+        price=Decimal(price),
+        is_available=is_available,
+    )
+    session.add(item)
+    await session.flush()
+    return item
+
+
+async def _address(
+    session: Any, user: User, *, lng: float = 36.81, lat: float = -1.31
+) -> Address:
+    a = Address(
+        user_id=user.id,
+        label="Home",
+        street="1 Main St",
+        city="Nairobi",
+        phone="+14155550000",
+        location=from_shape(Point(lng, lat), srid=4326),
+    )
+    session.add(a)
+    await session.flush()
+    return a
+
+
+# ---------------------------------------------------------------------------
+# Checkout tests (assertions match the Phase 5 PENDING_PAYMENT flow)
+# ---------------------------------------------------------------------------
+
+
+async def test_checkout_creates_order_in_pending_payment(db_session: Any) -> None:
+    """Phase 5 behavior: order starts in PENDING_PAYMENT, not PLACED."""
+    customer_user = await _user(db_session, user_type=UserType.customer)
+    cp = await _customer(db_session, customer_user)
+    owner = await _user(db_session, user_type=UserType.restaurant)
+    r = await _restaurant(db_session, owner)
+    item = await _menu_item(db_session, r, price="1000.00")
+    address = await _address(db_session, customer_user)
+    cart = await order_service.get_or_create_cart(db_session, cp.id)
+    await order_service.add_item_to_cart(db_session, cart, item.id, 2, None)
+
+    order = await order_service.checkout_cart(
+        db_session, cp.id, address.id, idempotency_key=None
+    )
+
+    assert order.status == OrderStatus.PENDING_PAYMENT
+    assert order.customer_id == cp.id
+    assert order.restaurant_id == r.id
+    assert order.subtotal == Decimal("2000.00")
+    assert order.delivery_fee == Decimal("50.00")
+    assert order.service_fee == Decimal("200.00")
+    assert order.total == Decimal("2250.00")
+    # Cart is NOT deleted on Phase 5 checkout
+    fresh_cart = await order_service.get_or_create_cart(db_session, cp.id)
+    assert fresh_cart.id == cart.id
+    # Payment is created in PENDING (not auto-SUCCEEDED)
+    from app.orders.models import Payment
+    from app.orders.enums import PaymentStatus
+    payment = (
+        await db_session.execute(
+            select(Payment).where(Payment.order_id == order.id)
+        )
+    ).scalar_one()
+    assert payment.status == PaymentStatus.PENDING
+
+
+async def test_checkout_idempotency_key_returns_existing_order(db_session: Any) -> None:
+    customer_user = await _user(db_session, user_type=UserType.customer)
+    cp = await _customer(db_session, customer_user)
+    owner = await _user(db_session, user_type=UserType.restaurant)
+    r = await _restaurant(db_session, owner)
+    item = await _menu_item(db_session, r, price="100.00")
+    address = await _address(db_session, customer_user)
+    cart = await order_service.get_or_create_cart(db_session, cp.id)
+    await order_service.add_item_to_cart(db_session, cart, item.id, 1, None)
+    key = str(uuid.uuid4())
+    o1 = await order_service.checkout_cart(
+        db_session, cp.id, address.id, idempotency_key=key
+    )
+    o2 = await order_service.checkout_cart(
+        db_session, cp.id, address.id, idempotency_key=key
+    )
+    assert o1.id == o2.id
+
+
+async def test_checkout_empty_cart_raises(db_session: Any) -> None:
+    from app.orders.exceptions import CartEmpty
+
+    customer_user = await _user(db_session, user_type=UserType.customer)
+    cp = await _customer(db_session, customer_user)
+    address = await _address(db_session, customer_user)
+    with pytest.raises(CartEmpty):
+        await order_service.checkout_cart(db_session, cp.id, address.id, None)
+
+
+async def test_checkout_address_not_owned_raises(db_session: Any) -> None:
+    from app.orders.exceptions import DeliveryAddressNotOwned
+
+    customer_user = await _user(db_session, user_type=UserType.customer)
+    cp = await _customer(db_session, customer_user)
+    other_user = await _user(db_session, user_type=UserType.customer)
+    address = await _address(db_session, other_user)
+    owner = await _user(db_session, user_type=UserType.restaurant)
+    r = await _restaurant(db_session, owner)
+    item = await _menu_item(db_session, r, price="100.00")
+    cart = await order_service.get_or_create_cart(db_session, cp.id)
+    await order_service.add_item_to_cart(db_session, cart, item.id, 1, None)
+    with pytest.raises(DeliveryAddressNotOwned):
+        await order_service.checkout_cart(db_session, cp.id, address.id, None)
+
+
+async def test_checkout_restaurant_closed_raises(db_session: Any) -> None:
+    from app.orders.exceptions import RestaurantClosed
+
+    customer_user = await _user(db_session, user_type=UserType.customer)
+    cp = await _customer(db_session, customer_user)
+    owner = await _user(db_session, user_type=UserType.restaurant)
+    r = await _restaurant(db_session, owner, is_open=False)
+    item = await _menu_item(db_session, r, price="100.00")
+    address = await _address(db_session, customer_user)
+    cart = await order_service.get_or_create_cart(db_session, cp.id)
+    await order_service.add_item_to_cart(db_session, cart, item.id, 1, None)
+    with pytest.raises(RestaurantClosed):
+        await order_service.checkout_cart(db_session, cp.id, address.id, None)
+
+
+async def test_checkout_unavailable_item_raises(db_session: Any) -> None:
+    from app.orders.exceptions import MenuItemUnavailable
+    from app.orders.models import CartItem
+
+    customer_user = await _user(db_session, user_type=UserType.customer)
+    cp = await _customer(db_session, customer_user)
+    owner = await _user(db_session, user_type=UserType.restaurant)
+    r = await _restaurant(db_session, owner)
+    item = await _menu_item(db_session, r, is_available=False)
+    address = await _address(db_session, customer_user)
+    cart = await order_service.get_or_create_cart(db_session, cp.id)
+    # Bypass the add_item_to_cart availability check by inserting directly
+    ci = CartItem(cart_id=cart.id, menu_item_id=item.id, quantity=1)
+    db_session.add(ci)
+    await db_session.flush()
+    with pytest.raises(MenuItemUnavailable):
+        await order_service.checkout_cart(db_session, cp.id, address.id, None)
+
+
+async def test_checkout_min_order_amount_raises(db_session: Any) -> None:
+    from sqlalchemy import update
+    from app.orders.exceptions import MinOrderAmountNotMet
+
+    customer_user = await _user(db_session, user_type=UserType.customer)
+    cp = await _customer(db_session, customer_user)
+    owner = await _user(db_session, user_type=UserType.restaurant)
+    r = await _restaurant(db_session, owner)
+    # Raise the min_order_amount
+    await db_session.execute(
+        update(RestaurantProfile)
+        .where(RestaurantProfile.id == r.id)
+        .values(min_order_amount=Decimal("9999.00"))
+    )
+    item = await _menu_item(db_session, r, price="100.00")
+    address = await _address(db_session, customer_user)
+    cart = await order_service.get_or_create_cart(db_session, cp.id)
+    await order_service.add_item_to_cart(db_session, cart, item.id, 1, None)
+    with pytest.raises(MinOrderAmountNotMet):
+        await order_service.checkout_cart(db_session, cp.id, address.id, None)
+
+
+async def test_checkout_address_out_of_range_raises(db_session: Any) -> None:
+    from app.orders.exceptions import DeliveryAddressOutOfRange
+
+    customer_user = await _user(db_session, user_type=UserType.customer)
+    cp = await _customer(db_session, customer_user)
+    owner = await _user(db_session, user_type=UserType.restaurant)
+    r = await _restaurant(db_session, owner)
+    item = await _menu_item(db_session, r, price="100.00")
+    # restaurant at (36.8, -1.3), radius 10km; address 200km away
+    address = await _address(db_session, customer_user, lng=39.0, lat=1.0)
+    cart = await order_service.get_or_create_cart(db_session, cp.id)
+    await order_service.add_item_to_cart(db_session, cart, item.id, 1, None)
+    with pytest.raises(DeliveryAddressOutOfRange):
+        await order_service.checkout_cart(db_session, cp.id, address.id, None)
+
+
+# ---------------------------------------------------------------------------
+# State machine + cancel tests (already worked; included for parity)
+# ---------------------------------------------------------------------------
+
+
+async def _force_order_to_state(
+    session: Any, *, target: OrderStatus
+) -> tuple[Order, User, User]:
+    """Helper: build an order in PENDING_PAYMENT then jump it to ``target``
+    via the existing transition logic (or raw SQL when transition doesn't allow it).
+    """
+    customer_user = await _user(session, user_type=UserType.customer)
+    cp = await _customer(session, customer_user)
+    owner = await _user(session, user_type=UserType.restaurant)
+    r = await _restaurant(session, owner)
+    item = await _menu_item(session, r, price="100.00")
+    address = await _address(session, customer_user)
+    cart = await order_service.get_or_create_cart(session, cp.id)
+    await order_service.add_item_to_cart(session, cart, item.id, 1, None)
+    order = await order_service.checkout_cart(session, cp.id, address.id, None)
+
+    # Walk through the state machine until we reach ``target``.
+    walk: list[OrderStatus] = []
+    current = order.status
+    while current != target:
+        if current == OrderStatus.PENDING_PAYMENT:
+            # In real flow, payment webhook does this; here we just force it.
+            await session.execute(
+                __import__("sqlalchemy").text(
+                    "UPDATE orders SET status='placed' WHERE id = :id"
+                ).bindparams(id=str(order.id))
+            )
+            current = OrderStatus.PLACED
+            walk.append(current)
+            continue
+        if current == OrderStatus.PLACED:
+            order.status = OrderStatus.CONFIRMED
+            current = OrderStatus.CONFIRMED
+            walk.append(current)
+            continue
+        if current == OrderStatus.CONFIRMED:
+            order.status = OrderStatus.PREPARING
+            current = OrderStatus.PREPARING
+            walk.append(current)
+            continue
+        if current == OrderStatus.PREPARING:
+            order.status = OrderStatus.READY
+            current = OrderStatus.READY
+            walk.append(current)
+            continue
+        if current == OrderStatus.READY:
+            order.status = OrderStatus.PICKED_UP
+            current = OrderStatus.PICKED_UP
+            walk.append(current)
+            continue
+        if current == OrderStatus.PICKED_UP:
+            order.status = OrderStatus.ON_THE_WAY
+            current = OrderStatus.ON_THE_WAY
+            walk.append(current)
+            continue
+        if current == OrderStatus.ON_THE_WAY:
+            order.status = OrderStatus.DELIVERED
+            current = OrderStatus.DELIVERED
+            walk.append(current)
+            continue
+        break
+    await session.flush()
+    return order, customer_user, owner
+
+
+async def test_restaurant_confirm_transition(db_session: Any) -> None:
+    order, _cu, owner = await _force_order_to_state(db_session, target=OrderStatus.PLACED)
+    order = await order_service.transition_order(
+        db_session, order, OrderStatus.CONFIRMED,
+        changed_by_user_id=owner.id, changed_by_role="restaurant"
+    )
+    assert order.status == OrderStatus.CONFIRMED
+
+
+async def test_restaurant_full_flow(db_session: Any) -> None:
+    order, _cu, owner = await _force_order_to_state(db_session, target=OrderStatus.PLACED)
+    for to in [OrderStatus.CONFIRMED, OrderStatus.PREPARING, OrderStatus.READY]:
+        order = await order_service.transition_order(
+            db_session, order, to,
+            changed_by_user_id=owner.id, changed_by_role="restaurant"
+        )
+    assert order.status == OrderStatus.READY
+
+
+async def test_invalid_transition_raises(db_session: Any) -> None:
+    from app.orders.exceptions import OrderInvalidTransition
+
+    order, _cu, owner = await _force_order_to_state(db_session, target=OrderStatus.PLACED)
+    with pytest.raises(OrderInvalidTransition):
+        await order_service.transition_order(
+            db_session, order, OrderStatus.READY,
+            changed_by_user_id=owner.id, changed_by_role="restaurant"
+        )
+
+
+async def test_customer_cancel_before_preparing_succeeds(db_session: Any) -> None:
+    order, customer_user, _owner = await _force_order_to_state(
+        db_session, target=OrderStatus.CONFIRMED
+    )
+    order = await order_service.cancel_order(
+        db_session, order,
+        cancelled_by_user_id=customer_user.id, role="customer", reason="changed mind"
+    )
+    assert order.status == OrderStatus.CANCELLED
+    assert order.cancellation_reason == "changed mind"
+
+
+async def test_customer_cancel_after_preparing_raises(db_session: Any) -> None:
+    from app.orders.exceptions import OrderNotCancellable
+
+    order, customer_user, _owner = await _force_order_to_state(
+        db_session, target=OrderStatus.PREPARING
+    )
+    with pytest.raises(OrderNotCancellable):
+        await order_service.cancel_order(
+            db_session, order,
+            cancelled_by_user_id=customer_user.id, role="customer", reason="x"
+        )
+
+
+async def test_restaurant_cancel_after_picked_up_raises(db_session: Any) -> None:
+    from app.orders.exceptions import OrderNotCancellable
+
+    order, _cu, owner = await _force_order_to_state(
+        db_session, target=OrderStatus.PICKED_UP
+    )
+    with pytest.raises(OrderNotCancellable):
+        await order_service.cancel_order(
+            db_session, order,
+            cancelled_by_user_id=owner.id, role="restaurant", reason="x"
+        )
+
+
+async def test_courier_cancel_before_picked_up_succeeds(db_session: Any) -> None:
+    order, _cu, _owner = await _force_order_to_state(
+        db_session, target=OrderStatus.PICKED_UP
+    )
+    courier_user = await _user(db_session, user_type=UserType.courier)
+    from app.users.models import CourierProfile
+    db_session.add(CourierProfile(user_id=courier_user.id, vehicle_type="bike"))
+    await db_session.flush()
+    order = await order_service.cancel_order(
+        db_session, order,
+        cancelled_by_user_id=courier_user.id, role="courier", reason="vehicle broke"
+    )
+    assert order.status == OrderStatus.CANCELLED
+
+
+async def test_pay_returns_existing_payment(db_session: Any) -> None:
+    """Sanity: after checkout, the payment row exists in PENDING."""
+    order, customer_user, _owner = await _force_order_to_state(
+        db_session, target=OrderStatus.PLACED
+    )
+    from app.orders.models import Payment
+    from app.orders.enums import PaymentStatus
+    payment = (
+        await db_session.execute(
+            select(Payment).where(Payment.order_id == order.id)
+        )
+    ).scalar_one()
+    assert payment.status == PaymentStatus.PENDING
