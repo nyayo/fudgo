@@ -81,16 +81,41 @@ All handlers go through `_record_webhook` which enforces the
 3. Delete the cart.
 4. Broadcast `order.status_changed` on `order:{order_id}` via the Phase 4 ConnectionManager.
 
-### The conftest fix (Phase 3/4 debt) — HONEST STATUS
+### The conftest fix (Phase 3/4 debt) — SOLVED in commit 150c746
 
-**Not closed.** I attempted two implementations this phase:
+The InFailedSQLTransaction failures that blocked the deferred order tests
+for three phases were **never a fixture problem**. They were downstream
+symptoms of two real production bugs in `checkout_cart`:
 
-1. **Shared AsyncSession via dependency override** — bind the route's session to the test's connection by overriding `get_db_session`.
-2. **SAVEPOINT (`begin_nested`)** — same setup plus a savepoint around each test.
+1. **asyncpg + `::` cast syntax**: `_restaurant_in_range` bound PostGIS
+   params as `:param::geography`. asyncpg's placeholder parser collides
+   with `::`, so the query raised `PostgresSyntaxError` on **every**
+   checkout. The function's broad `except Exception` swallowed it and ran
+   the haversine fallback — but the transaction was already aborted, so
+   the next statement (`SELECT nextval('order_number_seq')`) failed with
+   the misleading `InFailedSQLTransaction`.
+   **Fix**: convert WKB → WKT via `geoalchemy2.shape.to_shape` and use
+   `ST_GeogFromText(CAST(:wkt AS text))`.
 
-Both hit `InFailedSQLTransactionError` on `SELECT nextval('order_number_seq')` inside `checkout_cart`. Root cause: the route's session opens a *separate* asyncpg connection from a *separate* `AsyncSessionLocal()` factory; when a test seeds data and calls service functions in the same transaction scope, some intermediate statement aborts the shared transaction and every later statement fails until rollback.
+2. **`orders.order_number` VARCHAR(20)**: the generated format
+   `FUDGO-YYYYMMDD-NNNNNN` is 21 chars, so the order INSERT always failed
+   with `StringDataRightTruncationError`. Masked until now because no test
+   checkout ever got past bug #1.
+   **Fix**: migration `0008_order_number_length` widens to VARCHAR(32).
 
-**What shipped instead:** the deprecated test file was removed from collection entirely (not left as 16 skips), so the suite reports `263 passed, 1 skipped`. New Phase 5 tests avoid the issue by testing clients, webhooks, and pure state machines directly. The architectural fix (share one connection between the test's session and `Depends(get_session)` at the app level, likely by making the app engine NullPool-aware of an ambient test connection) is scoped in "Recommended follow-up" below.
+Two smaller bugs surfaced and were fixed by the same investigation:
+`COURIER_CANCELLABLE_STATES` was inconsistent with `ALLOWED_TRANSITIONS`
+(courier cancel at PICKED_UP passed the role gate then crashed the state
+machine), and `build_profile_for_user` crashed when `vehicle_type`
+round-tripped as plain str.
+
+**Conftest now**: opens one connection from the app engine, yields a
+single `AsyncSession` bound to it, and overrides `get_db_session` so
+routes share that session/transaction. The 16 deferred order tests are
+restored (rewritten against the Phase 5 PENDING_PAYMENT flow) and pass.
+
+Final suite: **279 passed, 1 skipped** (the one skip is the Phase 3 promo
+UUID-roundtrip edge case documented since Phase 3).
 
 ### M-Pesa B2C refund gap
 
