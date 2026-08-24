@@ -45,6 +45,33 @@ class Settings(BaseSettings):
     WS_PING_INTERVAL_S: int = 30
     WS_PONG_TIMEOUT_S: int = 10
 
+    # Stripe (Phase 5)
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_PUBLISHABLE_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_API_TIMEOUT_S: int = 10
+
+    # M-Pesa Daraja (Phase 5)
+    MPESA_ENVIRONMENT: str = "sandbox"
+    MPESA_CONSUMER_KEY: str = ""
+    MPESA_CONSUMER_SECRET: str = ""
+    MPESA_SHORTCODE: str = ""
+    MPESA_PASSKEY: str = ""
+    MPESA_STK_PUSH_CALLBACK_URL: str = ""
+    MPESA_API_TIMEOUT_S: int = 15
+
+    # Payment behavior (Phase 5)
+    PENDING_PAYMENT_CART_TTL_MINUTES: int = 30
+    PENDING_PAYMENT_SWEEP_INTERVAL_S: int = 300
+    STRIPE_MIN_AMOUNT_KES: float = 10.00
+    MPESA_MIN_AMOUNT_KES: float = 1.00
+
+    # Celery (Phase 5: PENDING_PAYMENT sweep only)
+    CELERY_BROKER_URL: str = "redis://localhost:6379/1"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
+    CELERY_TASK_ALWAYS_EAGER: bool = True  # bypasses broker in tests
+    DATABASE_URL_SYNC: str = ""
+
     # Database (PostGIS)
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432

@@ -14,6 +14,7 @@ from enum import Enum
 
 
 class OrderStatus(str, Enum):
+    PENDING_PAYMENT = "pending_payment"  # NEW Phase 5: order created, awaiting payment webhook
     PLACED = "placed"
     CONFIRMED = "confirmed"
     PREPARING = "preparing"
@@ -47,6 +48,7 @@ class PaymentMethod(str, Enum):
 # and from PICKED_UP and back to PICKED_UP for courier (courier can cancel
 # between accept and pickup only).
 ALLOWED_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
+    OrderStatus.PENDING_PAYMENT: {OrderStatus.PLACED, OrderStatus.CANCELLED},  # NEW Phase 5
     OrderStatus.PLACED: {
         OrderStatus.CONFIRMED,
         OrderStatus.CANCELLED,

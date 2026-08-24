@@ -844,6 +844,53 @@
         "title": "HeartbeatRequest",
         "type": "object"
       },
+      "InitiatePaymentRequest": {
+        "properties": {
+          "method": {
+            "enum": [
+              "card",
+              "mpesa"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "E.164 phone number; required when method=mpesa",
+            "title": "Phone"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "title": "InitiatePaymentRequest",
+        "type": "object"
+      },
+      "InitiatePaymentResponse": {
+        "description": "Response to POST /orders/{id}/pay.",
+        "properties": {
+          "attempt": {
+            "$ref": "#/components/schemas/PaymentAttemptResponse"
+          },
+          "payment": {
+            "$ref": "#/components/schemas/PaymentResponse"
+          }
+        },
+        "required": [
+          "payment",
+          "attempt"
+        ],
+        "title": "InitiatePaymentResponse",
+        "type": "object"
+      },
       "LinkGoogleAccountSchema": {
         "properties": {
           "id_token": {
@@ -1221,8 +1268,32 @@
         "title": "NotificationPreferenceUpdate",
         "type": "object"
       },
+      "OrderPaymentStatusResponse": {
+        "properties": {
+          "latest_attempt": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentAttemptResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "payment": {
+            "$ref": "#/components/schemas/PaymentResponse"
+          }
+        },
+        "required": [
+          "payment",
+          "latest_attempt"
+        ],
+        "title": "OrderPaymentStatusResponse",
+        "type": "object"
+      },
       "OrderStatus": {
         "enum": [
+          "pending_payment",
           "placed",
           "confirmed",
           "preparing",
@@ -1248,6 +1319,300 @@
         ],
         "title": "PasswordResetRequestSchema",
         "type": "object"
+      },
+      "PaymentAttemptResponse": {
+        "properties": {
+          "attempt_number": {
+            "title": "Attempt Number",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "failed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failed At"
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Reason"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "mpesa_checkout_request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mpesa Checkout Request Id"
+          },
+          "mpesa_merchant_request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mpesa Merchant Request Id"
+          },
+          "mpesa_phone_e164": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mpesa Phone E164"
+          },
+          "payment_id": {
+            "format": "uuid",
+            "title": "Payment Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentAttemptStatus"
+          },
+          "stripe_client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Client Secret"
+          },
+          "stripe_payment_intent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stripe Payment Intent Id"
+          },
+          "succeeded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Succeeded At"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "payment_id",
+          "attempt_number",
+          "method",
+          "status",
+          "stripe_payment_intent_id",
+          "stripe_client_secret",
+          "mpesa_checkout_request_id",
+          "mpesa_merchant_request_id",
+          "mpesa_phone_e164",
+          "succeeded_at",
+          "failed_at",
+          "failure_reason",
+          "idempotency_key",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "PaymentAttemptResponse",
+        "type": "object"
+      },
+      "PaymentAttemptStatus": {
+        "enum": [
+          "initiated",
+          "requires_action",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ],
+        "title": "PaymentAttemptStatus",
+        "type": "string"
+      },
+      "PaymentMethod": {
+        "enum": [
+          "stub",
+          "card",
+          "mpesa",
+          "cash"
+        ],
+        "title": "PaymentMethod",
+        "type": "string"
+      },
+      "PaymentResponse": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "currency": {
+            "title": "Currency",
+            "type": "string"
+          },
+          "external_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Reference"
+          },
+          "failed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failed At"
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Reason"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "method": {
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "order_id": {
+            "format": "uuid",
+            "title": "Order Id",
+            "type": "string"
+          },
+          "refunded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refunded At"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          },
+          "succeeded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Succeeded At"
+          }
+        },
+        "required": [
+          "id",
+          "order_id",
+          "method",
+          "status",
+          "amount",
+          "currency",
+          "external_reference",
+          "failure_reason",
+          "created_at",
+          "succeeded_at",
+          "failed_at",
+          "refunded_at"
+        ],
+        "title": "PaymentResponse",
+        "type": "object"
+      },
+      "PaymentStatus": {
+        "enum": [
+          "pending",
+          "succeeded",
+          "failed",
+          "refunded"
+        ],
+        "title": "PaymentStatus",
+        "type": "string"
       },
       "PromotionCreate": {
         "properties": {
@@ -4517,8 +4882,7 @@
     },
     "/api/v2/orders/{order_id}/pay": {
       "post": {
-        "description": "Payment is auto-succeeded at checkout (stub); this endpoint is a\nre-attempt for clients that want to confirm idempotently. If the\npayment already exists, return it.",
-        "operationId": "pay_api_v2_orders__order_id__pay_post",
+        "operationId": "pay_for_order_api_v2_orders__order_id__pay_post",
         "parameters": [
           {
             "in": "path",
@@ -4529,16 +4893,40 @@
               "title": "Order Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitiatePaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Pay Api V2 Orders  Order Id  Pay Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/InitiatePaymentResponse"
                 }
               }
             },
@@ -4560,9 +4948,58 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Pay",
+        "summary": "Pay For Order",
         "tags": [
-          "orders"
+          "payments"
+        ]
+      }
+    },
+    "/api/v2/orders/{order_id}/payment": {
+      "get": {
+        "description": "Return current payment + latest attempt for polling.",
+        "operationId": "get_order_payment_api_v2_orders__order_id__payment_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderPaymentStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Order Payment",
+        "tags": [
+          "payments"
         ]
       }
     },
@@ -4663,6 +5100,70 @@
         "summary": "Get Payment",
         "tags": [
           "orders"
+        ]
+      }
+    },
+    "/api/v2/payments/{payment_id}/refund": {
+      "post": {
+        "operationId": "refund_payment_api_v2_payments__payment_id__refund_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "payment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Payment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Refund Payment",
+        "tags": [
+          "payments"
         ]
       }
     },
@@ -7557,6 +8058,52 @@
         "summary": "Update Staff",
         "tags": [
           "users"
+        ]
+      }
+    },
+    "/api/v2/webhooks/mpesa": {
+      "post": {
+        "operationId": "mpesa_webhook_api_v2_webhooks_mpesa_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Mpesa Webhook Api V2 Webhooks Mpesa Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Mpesa Webhook",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/api/v2/webhooks/stripe": {
+      "post": {
+        "operationId": "stripe_webhook_api_v2_webhooks_stripe_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Stripe Webhook Api V2 Webhooks Stripe Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Stripe Webhook",
+        "tags": [
+          "payments"
         ]
       }
     },

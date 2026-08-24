@@ -529,7 +529,7 @@ async def checkout_cart(
         service_fee=service_fee,
         total_discount_amount=discount,
         total=total,
-        status=OrderStatus.PLACED,
+        status=OrderStatus.PENDING_PAYMENT,
         idempotency_key=idempotency_key,
     )
     session.add(order)
@@ -560,7 +560,7 @@ async def checkout_cart(
         OrderStatusHistory(
             order_id=order.id,
             from_status=None,
-            to_status=OrderStatus.PLACED,
+            to_status=OrderStatus.PENDING_PAYMENT,
             changed_by_role="customer",
         )
     )
@@ -569,15 +569,15 @@ async def checkout_cart(
         Payment(
             order_id=order.id,
             method="stub",
-            status="succeeded",
+            status="pending",
             amount=total,
-            succeeded_at=datetime.now(UTC),
         )
     )
-
-    for line in list(cart_items):
-        await session.delete(line)
-    await session.flush()
+    # Phase 5: cart is preserved on PENDING_PAYMENT; the cart is deleted
+    # only by the payment-success webhook (handle_stripe_webhook /
+    # handle_mpesa_callback) when the order transitions to PLACED. If the
+    # customer never pays, the cart stays put and the Celery sweep
+    # eventually CANCELS the order without destroying the cart.
     return order
 
 
