@@ -34,6 +34,11 @@ def _make_signature(payload: bytes, secret: str = TEST_SECRET, ts: int | None = 
 @pytest.fixture(autouse=True)
 def _secret(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", TEST_SECRET)
+    # get_settings() is lru_cached; the app may already have built the
+    # singleton with an empty secret. Patch the cached instance directly.
+    from app.core.config import get_settings
+
+    get_settings().STRIPE_WEBHOOK_SECRET = TEST_SECRET
 
 
 # ---------------------------------------------------------------------------

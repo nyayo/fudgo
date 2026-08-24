@@ -110,8 +110,9 @@ async def build_profile_for_user(session: AsyncSession, user: User) -> dict[str,
         ).scalar_one_or_none()
         if courier_prof is None:
             return None
+        vt = courier_prof.vehicle_type
         return {
-            "vehicle_type": courier_prof.vehicle_type.value,
+            "vehicle_type": vt.value if hasattr(vt, "value") else str(vt),
             "license_number": courier_prof.license_number,
             "is_available": courier_prof.is_available,
             "is_approved": courier_prof.is_approved,

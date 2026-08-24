@@ -125,7 +125,7 @@ class Order(SQLModel, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     order_number: str = Field(
-        max_length=20, unique=True, index=True, nullable=False
+        max_length=32, unique=True, index=True, nullable=False
     )
     customer_id: uuid.UUID = Field(
         foreign_key="customer_profiles.id", nullable=False, index=True

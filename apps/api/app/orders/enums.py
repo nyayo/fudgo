@@ -89,9 +89,12 @@ RESTAURANT_CANCELLABLE_STATES: frozenset[OrderStatus] = frozenset(
 # becomes attached to the order on the READY -> PICKED_UP transition, the
 # window is effectively just PICKED_UP. We allow PICKED_UP and ON_THE_WAY
 # here as a generous "before pickup" window.
-COURIER_CANCELLABLE_STATES: frozenset[OrderStatus] = frozenset(
-    {OrderStatus.PICKED_UP, OrderStatus.ON_THE_WAY}
-)
+# Courier cancel window is between accepting (PICKED_UP is set on accept in
+# Phase 3's manual-claim flow) and... nothing -- Phase 3's ALLOWED_TRANSITIONS
+# has no PICKED_UP -> CANCELLED edge, so once the courier has claimed and
+# picked up, cancel must go through the restaurant or fail. The empty set
+# keeps cancel_order's role gate consistent with the state machine.
+COURIER_CANCELLABLE_STATES: frozenset[OrderStatus] = frozenset()
 
 
 def can_transition(from_status: OrderStatus, to_status: OrderStatus) -> bool:

@@ -383,18 +383,30 @@ async def _restaurant_in_range(
     address: Address,
     radius_m: float,
 ) -> bool:
-    """PostGIS ST_DWithin; haversine fallback if PostGIS comparison fails."""
+    """PostGIS ST_DWithin; haversine fallback if PostGIS comparison fails.
+
+    NOTE on parameter binding: asyncpg does not support SQLAlchemy's
+    ``:param::type`` cast syntax (the ``:`` collides with asyncpg's own
+    placeholder prefix and produces "syntax error at or near \":\"").
+    Use ``ST_GeogFromText(CAST(:wkt AS text))`` or pass WKT through a
+    function call instead. See docs/PHASE_5_HANDOFF.md for the full
+    post-mortem -- this exact bug was the root cause of the Phase 3/4
+    "InFailedSQLTransaction" conftest mystery.
+    """
+    from geoalchemy2.shape import to_shape
+
     try:
+        rest_wkt = to_shape(restaurant.location).wkt
+        addr_wkt = to_shape(address.location).wkt
         result = (
             await session.execute(
                 text(
-                    "SELECT ST_DWithin(:addr::geography, :rest::geography, :r)"
+                    "SELECT ST_DWithin("
+                    "ST_GeogFromText(CAST(:addr AS text)), "
+                    "ST_GeogFromText(CAST(:rest AS text)), "
+                    ":r)"
                 ),
-                {
-                    "addr": str(address.location),
-                    "rest": str(restaurant.location),
-                    "r": radius_m,
-                },
+                {"addr": addr_wkt, "rest": rest_wkt, "r": radius_m},
             )
         ).scalar()
         return bool(result)

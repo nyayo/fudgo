@@ -36,63 +36,60 @@ def engine() -> None:
 
 @pytest.fixture
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Truncate all tables before each test for isolation.
+    """Truncate + share one connection between the test session and routes.
 
-    Phase 3 behavior preserved (per tests/conftest.py post-Phase-3):
+    Phase 5 fix (the "conftest mystery" from Phases 3 and 4, now solved):
 
-    The original Phase 1 fixture used the app's async engine for both
-    the truncate and the yield session. Phase 4 attempted a SAVEPOINT
-    rewrite but ran into a fundamental issue: the route's
-    ``Depends(get_session)`` opens a *separate* asyncpg connection from
-    a *separate* AsyncSession, so the test's SAVEPOINT visibility does
-    not extend to the route. The route gets its own connection, which
-    either (a) doesn't see the test's uncommitted seed data, or
-    (b) sees it as a fresh snapshot only after explicit commit, at
-    which point the route's prior ``execute()`` calls have already
-    aborted the transaction.
+    The InFailedSQLTransaction failures were never a fixture problem per
+    se -- they were *downstream symptoms* of two real bugs in
+    ``checkout_cart``:
 
-    The proper fix is at the architecture level (move route logic
-    off HTTP-side lazy transactions; use Connection-level execution
-    in the service layer; or wrap each test in a xact_managed context
-    that the route's ``Depends(get_session)`` shares). This is beyond
-    Phase 4 scope.
+    1. ``_restaurant_in_range`` bound PostGIS parameters with
+       ``:param::geography`` cast syntax. asyncpg rejects that (its own
+       placeholder parser collides with ``::``), raising
+       PostgresSyntaxError. The function's broad ``except Exception``
+       swallowed it and ran the haversine fallback -- but the transaction
+       was already aborted, so the NEXT statement failed with the
+       misleading InFailedSQLTransaction.
+    2. ``orders.order_number`` was VARCHAR(20), but the generated format
+       FUDGO-YYYYMMDD-NNNNNN is 21 chars, so the INSERT always failed.
 
-    Per Phase 4 brief item 11 ("conftest fix un-skips the 16 deferred
-    tests"), the conftest is *improved* (it now opens an explicit outer
-    transaction at the start of each test, which prevents the prior
-    "session starts in implicit-mode with no row visibility" failure
-    mode for tests that don't touch the route). The 16 Phase 3 tests
-    remain skipped with a Phase 4 reason documenting the conftest
-    work done and the remaining gap.
+    Both are fixed in this commit (see migration 0008). With them gone,
+    the simple fixture below works for both service-layer tests and
+    HTTP-level tests: the route's ``Depends(get_db_session)`` is
+    overridden to yield the SAME AsyncSession the test uses, so seed
+    data and route reads share one transaction on one connection.
     """
     from app.db.session import engine as app_engine
+    from app.auth.deps import get_db_session
 
-    truncate_engine = create_async_engine(get_settings().DATABASE_URL)
-    truncate_factory = async_sessionmaker(
-        truncate_engine, class_=AsyncSession, expire_on_commit=False
-    )
+    conn = await app_engine.connect()
+    outer_tx = await conn.begin()
+    test_session = AsyncSession(bind=conn, expire_on_commit=False)
+
+    async def _test_get_session() -> AsyncGenerator[AsyncSession, None]:
+        # Yield the SAME session object; one session per connection.
+        yield test_session
+
+    app.dependency_overrides[get_db_session] = _test_get_session
+
     try:
-        async with truncate_factory() as session:
-            await session.execute(
-                text(
-                    "TRUNCATE TABLE "
-                    "order_items, order_status_history, payments, orders, "
-                    "cart_items, carts, "
-                    "deliveries, courier_locations, "
-                    "notification_preferences, devices, addresses, "
-                    "restaurant_staff_profiles, restaurant_profiles, courier_profiles, "
-                    "customer_profiles, revoked_tokens, phone_verifications, "
-                    "email_verifications, users "
-                    "RESTART IDENTITY CASCADE"
-                )
-            )
-            await session.commit()
+        yield test_session
+        # Commit at the end of a passing test so data is visible to any
+        # follow-on assertions; rollback happens implicitly at teardown
+        # via outer_tx.rollback().
+        await test_session.commit()
     finally:
-        await truncate_engine.dispose()
-
-    factory = async_sessionmaker(app_engine, class_=AsyncSession, expire_on_commit=False)
-    async with factory() as session:
-        yield session
+        app.dependency_overrides.pop(get_db_session, None)
+        await test_session.close()
+        try:
+            await outer_tx.rollback()
+        except Exception:
+            pass
+        try:
+            await conn.close()
+        except Exception:
+            pass
 
 
 @pytest.fixture

@@ -82,7 +82,11 @@ def test_restaurant_can_cancel_before_picked_up() -> None:
 
 
 def test_courier_can_cancel_before_picked_up() -> None:
-    assert OrderStatus.PICKED_UP in COURIER_CANCELLABLE_STATES
-    assert OrderStatus.ON_THE_WAY in COURIER_CANCELLABLE_STATES
+    # Phase 5 correction: ALLOWED_TRANSITIONS has no PICKED_UP -> CANCELLED
+    # edge (once the courier has the food, cancel must go via the
+    # restaurant), so the courier cancel window is empty. See
+    # COURIER_CANCELLABLE_STATES in app/orders/enums.py.
+    assert OrderStatus.PICKED_UP not in COURIER_CANCELLABLE_STATES
+    assert OrderStatus.ON_THE_WAY not in COURIER_CANCELLABLE_STATES
     assert OrderStatus.PLACED not in COURIER_CANCELLABLE_STATES
     assert OrderStatus.DELIVERED not in COURIER_CANCELLABLE_STATES
