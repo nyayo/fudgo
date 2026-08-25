@@ -639,7 +639,39 @@ async def transition_order(
         )
     )
     await session.flush()
+
+    # Phase 6: fire notification tasks after the state is persisted. The
+    # tasks themselves are idempotent and read committed state; queueing
+    # here (post-flush) mirrors v1's post_save signal semantics.
+    _queue_order_notifications(order, str(from_status.value), str(to_status.value), note)
+
+    # Phase 6 auto-dispatch: when an order becomes READY with no courier,
+    # schedule the auto-assign task (it no-ops if a courier claimed manually).
+    if to_status == OrderStatus.READY:
+        try:
+            from app.deliveries.tasks import auto_assign_courier
+
+            auto_assign_courier.apply_async(
+                args=[str(order.id)],
+                countdown=__import__(
+                    "app.core.config", fromlist=["get_settings"]
+                ).get_settings().AUTO_DISPATCH_TIMEOUT_S,
+            )
+        except Exception:  # pragma: no cover -- broker-less dev/test envs
+            pass
+
     return order
+
+
+def _queue_order_notifications(
+    order: Order, from_status: str, to_status: str, reason: str | None
+) -> None:
+    try:
+        from app.notifications.transaction_hooks import on_order_status_changed
+
+        on_order_status_changed(order, from_status, to_status, reason)
+    except Exception:  # pragma: no cover -- notifications must never break orders
+        pass
 
 
 async def cancel_order(

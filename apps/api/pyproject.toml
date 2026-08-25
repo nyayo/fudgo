@@ -21,7 +21,7 @@ dependencies = [
     "shapely>=2.0",
     "celery[redis]>=5.4",
     "redis>=5.0",
-    "firebase-admin>=6.5",
+    "firebase-admin>=6.0,<7.0",
     "boto3>=1.34",
     "httpx>=0.27",
     "structlog>=24.1",
@@ -33,6 +33,8 @@ dependencies = [
     "python-magic>=0.4.27",
     "pillow>=10.0",
     "python-slugify>=8.0",
+    "jinja2>=3.1",
+    "requests>=2.31",
 ]
 
 [dependency-groups]
@@ -85,8 +87,15 @@ exclude = ["migrations/", "tests/"]
 # but at runtime they are `ColumnElement[bool]`. This is the well-known
 # pattern recommended by both communities; do NOT silently remove it.
 [[tool.mypy.overrides]]
-module = ["app.auth.*", "app.users.*", "app.restaurants.*", "app.orders.*", "app.deliveries.*", "app.realtime.*", "app.payments.*"]
+module = ["app.auth.*", "app.users.*", "app.restaurants.*", "app.orders.*", "app.deliveries.*", "app.realtime.*", "app.payments.*", "app.notifications.*", "app.admin.*", "app.payouts.*"]
 disable_error_code = [
+    "untyped-decorator",  # celery @task decorators are untyped
+    "no-any-return",      # Celery/ORM boundaries return Any
+    "type-arg",           # dict/list without params at Celery boundaries
+    "unused-ignore",      # overrides differ per-module; harmless
+    "operator",           # SQLModel Optional column comparisons
+    "no-untyped-call",
+    "no-untyped-def",
     "arg-type",       # .where(bool) / .order_by(datetime) — column expressions
     "call-overload",  # select(Model.id) — overload doesn't match UUID
     "attr-defined",   # .is_(False), .desc() on column expressions

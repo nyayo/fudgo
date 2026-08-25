@@ -72,6 +72,32 @@ class Settings(BaseSettings):
     CELERY_TASK_ALWAYS_EAGER: bool = True  # bypasses broker in tests
     DATABASE_URL_SYNC: str = ""
 
+    # Firebase / FCM (Phase 6) -- JSON string of the service account, never a file
+    FIREBASE_CREDENTIALS_JSON: str = ""
+    FIREBASE_PROJECT_ID: str = ""
+
+    # Plunk (email, Phase 6)
+    PLUNK_API_KEY: str = ""
+    PLUNK_FROM_EMAIL: str = "no-reply@fudgo.com"
+    PLUNK_FROM_NAME: str = "Fudgo"
+
+    # TextBee (SMS, Phase 6)
+    TEXTBEE_API_KEY: str = ""
+    TEXTBEE_DEVICE_ID: str = ""
+    TEXTBEE_SENDER_ID: str = "Fudgo"
+
+    # Platform economics (Phase 6)
+    PLATFORM_FEE_PERCENT: float = 0.15
+    COURIER_DELIVERY_FEE_PERCENT: float = 0.10
+
+    # Payout scheduling (Phase 6)
+    PAYOUT_PROCESSING_HOUR_UTC: int = 2
+    PAYOUT_MIN_ORDER_AGE_HOURS: int = 24
+    PAYOUT_RETRY_BACKOFF_S: int = 3600
+
+    # Auto-dispatch (Phase 6)
+    AUTO_DISPATCH_TIMEOUT_S: int = 60
+
     # Database (PostGIS)
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
@@ -150,9 +176,7 @@ class Settings(BaseSettings):
     MAX_IMAGE_DIMENSION_PX: int = 4096
     DEFAULT_SEARCH_RADIUS_KM: float = 5.0
     MAX_SEARCH_RADIUS_KM: float = 50.0
-    FIREBASE_CREDENTIALS_PATH: str = ""
-    TEXTBEE_API_KEY: str = ""
-    TEXTBEE_DEVICE_ID: str = ""
+    FIREBASE_CREDENTIALS_PATH: str = ""  # legacy; unused in v2 (env JSON only)
 
 
 @lru_cache

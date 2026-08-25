@@ -20,6 +20,7 @@ def _make_celery_app() -> Any:
     """
     try:
         from celery import Celery
+        from celery.schedules import crontab
         from celery.schedules import timedelta as _td
     except ImportError:
         return None
@@ -49,6 +50,22 @@ def _make_celery_app() -> Any:
             "task": "orders.sweep_stale_pending_payments",
             "schedule": _td(seconds=settings.PENDING_PAYMENT_SWEEP_INTERVAL_S),
             "options": {"queue": "default"},
+        },
+        # Phase 6
+        "check-expired-promotions": {
+            "task": "restaurants.check_expired_promotions",
+            "schedule": _td(hours=1),
+            "options": {"queue": "default"},
+        },
+        "check-scheduled-promotions": {
+            "task": "restaurants.check_scheduled_promotions",
+            "schedule": _td(hours=1),
+            "options": {"queue": "default"},
+        },
+        "process-pending-payouts": {
+            "task": "payouts.process_pending_payouts",
+            "schedule": crontab(hour=settings.PAYOUT_PROCESSING_HOUR_UTC, minute=0),
+            "options": {"queue": "payouts"},
         },
     }
     return app

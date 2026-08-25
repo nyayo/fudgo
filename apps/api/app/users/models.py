@@ -36,6 +36,7 @@ class User(SQLModel, table=True):
     user_type: UserType = Field(nullable=False, index=True)
     auth_provider: AuthProvider = Field(default=AuthProvider.email, nullable=False, index=True)
     is_verified: bool = Field(default=False, nullable=False, index=True)
+    is_admin: bool = Field(default=False, nullable=False, index=True)
     is_active: bool = Field(default=True, nullable=False)
     is_staff: bool = Field(default=False, nullable=False)
     is_superuser: bool = Field(default=False, nullable=False)
