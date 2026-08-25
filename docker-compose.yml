@@ -1,0 +1,93 @@
+# Fudgo v2 -- full local dev stack (Phase 7)
+# Usage: docker compose up --build
+# Then:  docker compose exec api alembic upgrade head
+#        curl http://localhost:8000/health/ready
+
+services:
+  api:
+    build:
+      context: ./apps/api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports: ["8000:8000"]
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: fudgo
+      DB_PASSWORD: fudgo_dev_password
+      DB_NAME: fudgo
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      DATABASE_URL_SYNC: postgresql+psycopg2://fudgo:fudgo_dev_password@db:5432/fudgo
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      WS_MULTI_REPLICA: "true"
+      CACHE_ENABLED: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app/apps/api
+
+  celery_worker:
+    build:
+      context: ./apps/api
+    command: celery -A app.core.celery_app worker --loglevel=info --concurrency=4 -Q default,notifications,payouts
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: fudgo
+      DB_PASSWORD: fudgo_dev_password
+      DB_NAME: fudgo
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      DATABASE_URL_SYNC: postgresql+psycopg2://fudgo:fudgo_dev_password@db:5432/fudgo
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app/apps/api
+
+  celery_beat:
+    build:
+      context: ./apps/api
+    command: celery -A app.core.celery_app beat --loglevel=info
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app/apps/api
+
+  db:
+    image: imresamu/postgis:16-3.4
+    environment:
+      POSTGRES_USER: fudgo
+      POSTGRES_PASSWORD: fudgo_dev_password
+      POSTGRES_DB: fudgo
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fudgo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:

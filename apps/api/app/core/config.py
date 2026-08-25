@@ -98,6 +98,11 @@ class Settings(BaseSettings):
     # Auto-dispatch (Phase 6)
     AUTO_DISPATCH_TIMEOUT_S: int = 60
 
+    # Phase 7 -- scale
+    WS_MULTI_REPLICA: bool = False  # True in production; False in dev/test
+    CACHE_DEFAULT_TTL_S: int = 60
+    CACHE_ENABLED: bool = True
+
     # Database (PostGIS)
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432

@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.deps import get_session
+from app.cache.deps import get_cache as get_cache_dep
 from app.core.envelope import success_envelope
 from app.restaurants import service as rest_service
 from app.restaurants.schemas import (
@@ -55,9 +56,19 @@ async def list_menu_items_global(
 async def get_menu_item(
     item_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
+    cache: Any = Depends(get_cache_dep),
 ) -> dict[str, Any]:
+    key = None
+    if cache is not None:
+        key = f"cache:menu_item:{item_id}"
+        cached = await cache.get(key)
+        if cached is not None:
+            return success_envelope(cached)
     payload = await rest_service.get_item(session, item_id)
-    return success_envelope(MenuItemResponse.model_validate(payload).model_dump())
+    data = MenuItemResponse.model_validate(payload).model_dump()
+    if key is not None and data is not None:
+        await cache.set(key, data)
+    return success_envelope(data)
 
 
 @router.get("/promotions")
@@ -88,23 +99,30 @@ async def list_promotions_global(
 @router.get("/promotions/active")
 async def list_active_promotions(
     session: AsyncSession = Depends(get_session),
+    cache: Any = Depends(get_cache_dep),
 ) -> dict[str, Any]:
     from datetime import UTC, datetime
 
     from app.restaurants.models import Promotion
     from sqlalchemy import select
 
-    now = datetime.now(UTC)
-    rows = (
-        await session.execute(
-            select(Promotion).where(
-                Promotion.is_active == True,  # noqa: E712
-                Promotion.start_date <= now,
-                Promotion.end_date > now,
+    async def _load() -> list[dict[str, Any]]:
+        now = datetime.now(UTC)
+        rows = (
+            await session.execute(
+                select(Promotion).where(
+                    Promotion.is_active == True,  # noqa: E712
+                    Promotion.start_date <= now,
+                    Promotion.end_date > now,
+                )
             )
-        )
-    ).scalars().all()
-    return success_envelope([rest_service._serialize_promotion(p) for p in rows])
+        ).scalars().all()
+        return [rest_service._serialize_promotion(p) for p in rows]
+
+    if cache is None:
+        return success_envelope(await _load())
+    data = await cache.get_or_set("cache:promotion:active:global", _load)
+    return success_envelope(data)
 
 
 @router.get("/promotions/{promotion_id}")

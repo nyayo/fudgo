@@ -45,6 +45,19 @@ def _make_celery_app() -> Any:
         task_eager_propagates=True,
         broker_connection_retry_on_startup=True,
     )
+    # Phase 7: route tasks to dedicated queues
+    app.conf.task_routes = {
+        "notifications.*": {"queue": "notifications"},
+        "payouts.*": {"queue": "payouts"},
+        "cache.*": {"queue": "default"},
+        "orders.*": {"queue": "default"},
+        "deliveries.*": {"queue": "default"},
+        "restaurants.*": {"queue": "default"},
+        "admin.*": {"queue": "default"},
+    }
+    app.conf.task_default_queue = "default"
+    app.conf.task_default_priority = 5
+
     app.conf.beat_schedule = {
         "sweep-stale-pending-payments": {
             "task": "orders.sweep_stale_pending_payments",

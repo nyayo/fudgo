@@ -8,6 +8,7 @@ that uvicorn/asgi servers bind to.
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import Any
 
 import structlog
 from fastapi import FastAPI, Request
@@ -45,18 +46,71 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
         db_host=settings.DB_HOST,
         version=settings.VERSION,
     )
-    # Phase 4: in-process WebSocket pub/sub
+    # Phase 7: WebSocket pub/sub -- in-process by default, Redis for
+    # multi-replica deploys (WS_MULTI_REPLICA=true).
     from app.deliveries.runtime import set_connection_manager
-    from app.realtime.connection_manager import ConnectionManager
-
-    manager = ConnectionManager(
-        max_per_user=settings.WS_MAX_CONNECTIONS_PER_USER,
-        ping_interval_s=settings.WS_PING_INTERVAL_S,
-        pong_timeout_s=settings.WS_PONG_TIMEOUT_S,
+    from app.realtime.connection_manager import (
+        ConnectionManager,
+        RedisConnectionManager,
     )
+
+    manager: Any = None
+    redis_client: Any = None
+    if get_settings().WS_MULTI_REPLICA:
+        try:
+            from redis.asyncio import from_url
+
+            redis_client: Any = from_url(  # type: ignore[no-untyped-call, no-redef]
+                get_settings().REDIS_URL_RESOLVED, decode_responses=True
+            )
+            cm = RedisConnectionManager(
+                redis_client,
+                max_per_user=settings.WS_MAX_CONNECTIONS_PER_USER,
+                ping_interval_s=settings.WS_PING_INTERVAL_S,
+                pong_timeout_s=settings.WS_PONG_TIMEOUT_S,
+            )
+            await cm.start()
+            manager = cm
+            logger.info("WebSocket pub/sub: Redis multi-replica mode")
+        except Exception as e:
+            logger.warning(
+                f"Redis unavailable ({e}); falling back to in-process pub/sub"
+            )
+            redis_client = None
+    if manager is None:
+        manager = ConnectionManager(
+            max_per_user=settings.WS_MAX_CONNECTIONS_PER_USER,
+            ping_interval_s=settings.WS_PING_INTERVAL_S,
+            pong_timeout_s=settings.WS_PONG_TIMEOUT_S,
+        )
+        logger.info("WebSocket pub/sub: in-process mode")
     app.state.connection_manager = manager
     set_connection_manager(manager)
+
+    # Phase 7: cache service (only when a real Redis client is available)
+    if redis_client is not None:
+        try:
+            from app.cache.cache_service import CacheService
+            from app.cache.invalidation import set_cache as _set_cache
+
+            cache = CacheService(
+                redis_client,
+                default_ttl_s=get_settings().CACHE_DEFAULT_TTL_S,
+            )
+            app.state.cache = cache
+            _set_cache(cache)
+        except Exception as e:
+            logger.warning(f"Cache init failed: {e}")
     yield
+
+    # Shutdown
+    if isinstance(manager, RedisConnectionManager):
+        await manager.stop()
+    if redis_client is not None:
+        try:
+            await redis_client.aclose()
+        except Exception:
+            pass
     await engine.dispose()
     logger.info("fudgo-api shutdown complete")
 

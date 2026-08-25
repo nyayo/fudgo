@@ -283,6 +283,20 @@ async def get_item(
     return success_envelope(MenuItemResponse.model_validate(result).model_dump())
 
 
+def _invalidate_item_cache(item_id, restaurant_id) -> None:
+    """Fire cache invalidation tasks after a menu-item write (Phase 7)."""
+    try:
+        from app.cache.invalidation import (
+            invalidate_menu_item,
+            invalidate_restaurant,
+        )
+
+        invalidate_menu_item.delay(str(item_id), str(restaurant_id))
+        invalidate_restaurant.delay(str(restaurant_id))
+    except Exception:
+        pass
+
+
 @router.patch("/restaurants/{restaurant_id}/categories/{category_id}/items/{item_id}")
 async def update_item(
     restaurant_id: uuid.UUID,
@@ -297,6 +311,7 @@ async def update_item(
         session, item_id, current, payload.model_dump(exclude_unset=True)
     )
     await session.commit()
+    _invalidate_item_cache(item_id, restaurant_id)
     return success_envelope(MenuItemResponse.model_validate(result).model_dump())
 
 
@@ -311,6 +326,7 @@ async def delete_item(
     _require_owner(restaurant_id, current)
     await rest_service.delete_item(session, item_id, current)
     await session.commit()
+    _invalidate_item_cache(item_id, restaurant_id)
     return success_envelope({"message": "Item deleted"})
 
 
