@@ -68,6 +68,14 @@ class CustomerProfile(SQLModel, table=True):
     order_stats: dict[str, Any] = Field(
         default_factory=dict, sa_column=Column(JSONB, nullable=False, server_default="{}")
     )
+    # Phase 8: dietary preferences + allergens (validated against
+    # dietary_tags.slug on write; preferences exclude is_allergen tags).
+    dietary_preferences: list[Any] = Field(
+        default_factory=list, sa_column=Column(JSONB, nullable=False, server_default="[]")
+    )
+    allergens: list[Any] = Field(
+        default_factory=list, sa_column=Column(JSONB, nullable=False, server_default="[]")
+    )
 
 
 class CourierProfile(SQLModel, table=True):
@@ -84,6 +92,7 @@ class CourierProfile(SQLModel, table=True):
         default_factory=dict, sa_column=Column(JSONB, nullable=False, server_default="{}")
     )
     rating: Decimal = Field(default=Decimal("0"), nullable=False)
+    rating_count: int = Field(default=0, nullable=False)
     total_deliveries: int = Field(default=0, nullable=False, index=True)
     earnings_balance: Decimal = Field(default=Decimal("0"), nullable=False)
     last_heartbeat_at: datetime | None = Field(
@@ -105,6 +114,7 @@ class RestaurantProfile(SQLModel, table=True):
         default_factory=dict, sa_column=Column(JSONB, nullable=False, server_default="{}")
     )
     rating: Decimal = Field(default=Decimal("0"), nullable=False, index=True)
+    rating_count: int = Field(default=0, nullable=False)
     is_approved: bool = Field(default=False, nullable=False)
     is_active: bool = Field(default=True, nullable=False)
     # Phase 3: delivery configuration

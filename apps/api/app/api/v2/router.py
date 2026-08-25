@@ -10,6 +10,7 @@ from app.core.config import get_settings
 from app.deliveries.router import router as deliveries_router
 from app.orders.router import router as orders_router
 from app.admin.router import router as admin_router
+from app.search.router import router as discovery_router
 from app.payments.router import router as payments_router
 from app.realtime.router import router as realtime_router
 from app.restaurants.router import router as restaurants_router
@@ -35,3 +36,4 @@ router.include_router(deliveries_router, tags=["deliveries"])
 router.include_router(payments_router, tags=["payments"])
 router.include_router(realtime_router, tags=["realtime"])
 router.include_router(admin_router, tags=["admin"])
+router.include_router(discovery_router, tags=["search","reviews","discovery"])

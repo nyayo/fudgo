@@ -88,7 +88,7 @@ exclude = ["migrations/", "tests/"]
 # but at runtime they are `ColumnElement[bool]`. This is the well-known
 # pattern recommended by both communities; do NOT silently remove it.
 [[tool.mypy.overrides]]
-module = ["app.auth.*", "app.users.*", "app.restaurants.*", "app.orders.*", "app.deliveries.*", "app.realtime.*", "app.payments.*", "app.notifications.*", "app.admin.*", "app.payouts.*", "app.cache.*"]
+module = ["app.auth.*", "app.users.*", "app.restaurants.*", "app.orders.*", "app.deliveries.*", "app.realtime.*", "app.payments.*", "app.notifications.*", "app.admin.*", "app.payouts.*", "app.cache.*", "app.search.*", "app.reviews.*"]
 disable_error_code = [
     "untyped-decorator",  # celery @task decorators are untyped
     "no-any-return",      # Celery/ORM boundaries return Any

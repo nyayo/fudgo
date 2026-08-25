@@ -103,6 +103,12 @@ class Settings(BaseSettings):
     CACHE_DEFAULT_TTL_S: int = 60
     CACHE_ENABLED: bool = True
 
+    # Phase 8 -- discovery
+    SEARCH_RESULTS_DEFAULT_LIMIT: int = 20
+    SEARCH_RESULTS_MAX_LIMIT: int = 100
+    SEARCH_POPULAR_TTL_S: int = 300
+    SEARCH_TRENDING_WINDOW_DAYS: int = 7
+
     # Database (PostGIS)
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
